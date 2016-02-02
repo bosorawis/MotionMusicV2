@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity implements LeftHandFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements LeftHandFragment.OnFragmentInteractionListener, RightHandFragment.OnFragmentInteractionListener{
     protected static String testVal = "hello";
     protected static String[] listitems = {"Volume", "Pitch", "Reverb"};
     static List<String> selectedItem = new ArrayList<String>();
