@@ -19,8 +19,14 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 public class MainActivity extends AppCompatActivity {
     protected static String testVal = "hello";
+    protected static String[] listitems = {"item1", "item2", "item3"};
+    static List<String> selectedItem = new ArrayList<String>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +57,11 @@ public class MainActivity extends AppCompatActivity {
         checkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("Value",testVal);
+                int i;
+                Log.d("Selected Value",testVal);
+                for (i = 0 ; i < selectedItem.size() ; i++){
+                    Log.d("Value: ", selectedItem.get(i));
+                }
             }
         });
     }
@@ -77,6 +87,28 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+    /*
+    Helper function to check if an item is in selectedItem
+     */
+    protected boolean isSelected(String item){
+        int i;
+        for (i = 0 ; i < selectedItem.size() ; i++){
+            if(Objects.equals(selectedItem.get(i), item)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected void removeItem(String item) {
+        int i;
+        for (i = 0; i < selectedItem.size(); i++) {
+            if (Objects.equals(selectedItem.get(i), item)) {
+                selectedItem.remove(i);
+                return;
+            }
+        }
+    }
 
     /**
      * DialogFragment class
@@ -84,10 +116,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public static class MyDialogFragment extends DialogFragment implements AdapterView.OnItemClickListener {
 
-
-        String[] listitems = {"item1", "item2", "item3"};
         ListView myList;
-
         @Nullable
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -102,13 +131,14 @@ public class MainActivity extends AppCompatActivity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             dismiss();
             testVal = listitems[position];
+            selectedItem.add(listitems[position]);
             Toast.makeText(getActivity(), listitems[position], Toast.LENGTH_SHORT)
                     .show();
-
         }
 
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
+            //Log.d("Popup", "onActivityCreated");
             super.onActivityCreated(savedInstanceState);
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
                     android.R.layout.simple_list_item_1, listitems);
