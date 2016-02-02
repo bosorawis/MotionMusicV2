@@ -1,5 +1,6 @@
 package complexability.motionmusicv2;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -23,10 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LeftHandFragment.OnFragmentInteractionListener{
     protected static String testVal = "hello";
-    protected static String[] listitems = {"item1", "item2", "item3"};
+    protected static String[] listitems = {"Volume", "Pitch", "Reverb"};
     static List<String> selectedItem = new ArrayList<String>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,14 +38,6 @@ public class MainActivity extends AppCompatActivity {
         final Button testButton = (Button) findViewById(R.id.testButton);
         final Button checkButton = (Button) findViewById(R.id.checkVal);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
         testButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,6 +104,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
     /**
      * DialogFragment class
      * Created by Sorawis on 1/26/2016.
@@ -148,8 +147,5 @@ public class MainActivity extends AppCompatActivity {
             myList.setOnItemClickListener(this);
 
         }
-
-
-
     }
 }
