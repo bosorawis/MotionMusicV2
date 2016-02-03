@@ -1,7 +1,11 @@
 package complexability.motionmusicv2;
 
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -17,18 +21,50 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
+import com.csounds.CsoundObj;
+import com.csounds.bindings.motion.CsoundMotion;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import app.akexorcist.bluetotohspp.library.BluetoothSPP;
+import app.akexorcist.bluetotohspp.library.BluetoothState;
+import app.akexorcist.bluetotohspp.library.DeviceList;
+import csnd6.Csound;
+
+/**
+ * MainActivity of the app
+ * Contains
+ * **Bluetooth
+ * **Csound
+ */
 public class MainActivity extends AppCompatActivity implements LeftHandFragment.OnFragmentInteractionListener, RightHandFragment.OnFragmentInteractionListener{
     protected static String testVal = "hello";
     protected static String[] listitems = {"Volume", "Pitch", "Reverb"};
     static List<String> selectedItem = new ArrayList<String>();
 
+    /*
+    Csound initialization
+     */
+    protected CsoundObj csoundObj = new CsoundObj(false,true);
+    protected Handler handler = new Handler();
+    ToggleButton startStop;
+
+
+    //Bluetooth Initialization
+    protected  BluetoothSPP bt;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +73,66 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         setSupportActionBar(toolbar);
         final Button testButton = (Button) findViewById(R.id.testButton);
         final Button checkButton = (Button) findViewById(R.id.checkVal);
+        startStop = (ToggleButton) findViewById(R.id.onOffButton);
 
+        /*
+        Here for testing csound
+         */
+        startStop.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    String csd = getResourceFileAsString(R.raw.test);
+                    File f = createTempFile(csd);
+
+                    CsoundMotion csoundMotion = new CsoundMotion(csoundObj);
+                    csoundMotion.enableAccelerometer(MainActivity.this);
+                    csoundObj.startCsound(f);
+                }
+                else{
+                    csoundObj.stop();
+                }
+            }
+        });
+        //**********************************************************************************
+        /*
+        Handle Bluetooth stuff here
+         */
+        bt = new BluetoothSPP(this);
+
+        if(!bt.isBluetoothAvailable()){
+            Toast.makeText(getApplicationContext() , "Bluetooth is not available", Toast.LENGTH_SHORT).show();
+            Log.d("MainActivity", "Bluetooth is NOT available");
+            finish();
+        }
+        else{
+            Log.d("MainActivity","Bluetooth is available");
+        }
+
+        bt.setBluetoothConnectionListener(new BluetoothSPP.BluetoothConnectionListener() {
+            public void onDeviceConnected(String name, String address) {
+                Toast.makeText(getApplicationContext()
+                        , "Connected to " + name + "\n" + address
+                        , Toast.LENGTH_SHORT).show();
+            }
+
+            public void onDeviceDisconnected() {
+                Toast.makeText(getApplicationContext()
+                        , "Connection lost", Toast.LENGTH_SHORT).show();
+            }
+
+            public void onDeviceConnectionFailed() {
+                Toast.makeText(getApplicationContext()
+                        , "Unable to connect", Toast.LENGTH_SHORT).show();
+            }
+        });
+        bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
+            public void onDataReceived(byte[] data, String message) {
+                //Toast.makeText(SimpleActivity.this, message, Toast.LENGTH_SHORT).show();
+                Log.d("MainActivity", message);
+            }
+        });
+        //**********END BLUETOOTH*******************************//
         testButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,14 +146,64 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         checkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                /*
                 int i;
                 Log.d("Selected Value",testVal);
                 for (i = 0 ; i < selectedItem.size() ; i++){
                     Log.d("Value: ", selectedItem.get(i));
                 }
+                */
+                if(bt.getServiceState() == BluetoothState.STATE_CONNECTED) {
+                    bt.disconnect();
+                } else {
+                    Intent intent = new Intent(getApplicationContext(), DeviceList.class);
+                    startActivityForResult(intent, BluetoothState.REQUEST_CONNECT_DEVICE);
+                }
+
             }
         });
+        //TODO
+        //Add Bluetooth connect button somewhere
     }
+
+    @Override
+    protected void onStart() {
+        /*
+        More bluetooth handler
+         */
+        super.onStart();
+        if (!bt.isBluetoothEnabled()) {
+            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(intent, BluetoothState.REQUEST_ENABLE_BT);
+        }
+        else {
+            if(!bt.isServiceAvailable()) {
+                bt.setupService();
+                bt.startService(BluetoothState.DEVICE_OTHER);
+                Log.d("MainActivity", "Bluetooth Connect");
+            }
+        }
+        //*********************************************
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == BluetoothState.REQUEST_CONNECT_DEVICE) {
+            if(resultCode == Activity.RESULT_OK)
+                bt.connect(data);
+        } else if(requestCode == BluetoothState.REQUEST_ENABLE_BT) {
+            if(resultCode == Activity.RESULT_OK) {
+                bt.setupService();
+                bt.startService(BluetoothState.DEVICE_ANDROID);
+            } else {
+                Toast.makeText(getApplicationContext()
+                        , "Bluetooth was not enabled."
+                        , Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -76,6 +221,10 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+        else if (id == R.id.action_bluetooth){
+            Log.d("MainActivity", "Bluetooth Select");
             return true;
         }
 
@@ -108,6 +257,60 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     public void onFragmentInteraction(Uri uri) {
 
     }
+
+    /**
+     * Csound handler functions
+     * Taken from BaseCsoundActivity because we are working with single activity application
+     */
+
+    protected String getResourceFileAsString(int resId) {
+        StringBuilder str = new StringBuilder();
+
+        InputStream is = getResources().openRawResource(resId);
+        BufferedReader r = new BufferedReader(new InputStreamReader(is));
+        String line;
+
+        try {
+            while ((line = r.readLine()) != null) {
+                str.append(line).append("\n");
+            }
+        } catch (IOException ios) {
+
+        }
+
+        return str.toString();
+    }
+
+    protected File createTempFile(String csd) {
+        File f = null;
+
+        try {
+            f = File.createTempFile("temp", ".csd", this.getCacheDir());
+            FileOutputStream fos = new FileOutputStream(f);
+            fos.write(csd.getBytes());
+            fos.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return f;
+    }
+
+    public void csoundObjStarted(CsoundObj csoundObj) {}
+
+    public void csoundObjCompleted(CsoundObj csoundObj) {
+        handler.post(new Runnable() {
+            public void run() {
+                startStop.setChecked(false);
+            }
+        });
+    }
+
+    /**********************************************************************
+                    End of Csound external handler
+     * *******************************************************************/
+
 
     /**
      * DialogFragment class
@@ -148,4 +351,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
         }
     }
+    /**********************************************************************
+                    End of MyDialogFragment
+     * *******************************************************************/
 }
