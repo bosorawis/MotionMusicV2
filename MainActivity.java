@@ -27,7 +27,9 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.csounds.CsoundObj;
+import com.csounds.bindings.CsoundBinding;
 import com.csounds.bindings.motion.CsoundMotion;
+import com.csounds.bindings.ui.CsoundUI;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -43,6 +45,8 @@ import app.akexorcist.bluetotohspp.library.BluetoothSPP;
 import app.akexorcist.bluetotohspp.library.BluetoothState;
 import app.akexorcist.bluetotohspp.library.DeviceList;
 import csnd6.Csound;
+import csnd6.CsoundMYFLTArray;
+import csnd6.controlChannelType;
 
 /**
  * MainActivity of the app
@@ -50,18 +54,18 @@ import csnd6.Csound;
  * **Bluetooth
  * **Csound
  */
-public class MainActivity extends AppCompatActivity implements LeftHandFragment.OnFragmentInteractionListener, RightHandFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements LeftHandFragment.OnFragmentInteractionListener, RightHandFragment.OnFragmentInteractionListener, CsoundBinding {
     protected static String testVal = "hello";
     protected static String[] listitems = {"Volume", "Pitch", "Reverb"};
     static List<String> selectedItem = new ArrayList<String>();
-
+    CsoundMYFLTArray testArr[] = new CsoundMYFLTArray[1];
     /*
     Csound initialization
      */
     protected CsoundObj csoundObj = new CsoundObj(false,true);
     protected Handler handler = new Handler();
     ToggleButton startStop;
-
+    float csdTest = 0;
 
     //Bluetooth Initialization
     protected  BluetoothSPP bt;
@@ -71,6 +75,16 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        /**
+         * CSD initialization
+         */
+        String csd = getResourceFileAsString(R.raw.test);
+        File f = createTempFile(csd);
+        csoundObj.addBinding(this);
+        csoundObj.startCsound(f);
+        //END CSD
+
         final Button testButton = (Button) findViewById(R.id.testButton);
         final Button checkButton = (Button) findViewById(R.id.checkVal);
         startStop = (ToggleButton) findViewById(R.id.onOffButton);
@@ -82,16 +96,12 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
-                    String csd = getResourceFileAsString(R.raw.test);
-                    File f = createTempFile(csd);
-
-                    CsoundMotion csoundMotion = new CsoundMotion(csoundObj);
-                    csoundMotion.enableAccelerometer(MainActivity.this);
-                    csoundObj.startCsound(f);
+                    //testArr[0].SetValue(0, csdTest);
+                    Log.d("MainActivity","SEND PLAY TO CSD");
+                    csoundObj.sendScore(String.format("i1.%d 0 -2 %d", 0, 0));
                 }
                 else{
-                    csoundObj.stop();
-                }
+                    csoundObj.sendScore(String.format("i-1.%d 0 0 %d", 0, 0));                }
             }
         });
         //**********************************************************************************
@@ -126,10 +136,18 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                         , "Unable to connect", Toast.LENGTH_SHORT).show();
             }
         });
+        //TODO
+        /**
+         * Data receive method
+         */
         bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
             public void onDataReceived(byte[] data, String message) {
                 //Toast.makeText(SimpleActivity.this, message, Toast.LENGTH_SHORT).show();
                 Log.d("MainActivity", message);
+                csdTest += Float.parseFloat(message);
+                Log.d("MainActivity", "val: " + csdTest);
+                testArr[0].SetValue(0, csdTest);
+                csoundObj.sendScore(String.format("i1.%d 0 -2 %d", 0, 0));
             }
         });
         //**********END BLUETOOTH*******************************//
@@ -154,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                     Log.d("Value: ", selectedItem.get(i));
                 }
                 */
-                if(bt.getServiceState() == BluetoothState.STATE_CONNECTED) {
+                if (bt.getServiceState() == BluetoothState.STATE_CONNECTED) {
                     bt.disconnect();
                 } else {
                     Intent intent = new Intent(getApplicationContext(), DeviceList.class);
@@ -305,6 +323,31 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 startStop.setChecked(false);
             }
         });
+    }
+
+    @Override
+    public void setup(CsoundObj csoundObj) {
+        Log.d("MainActivity", "Setup");
+        testArr[0] = csoundObj.getInputChannelPtr(String.format("testValue.%d", 0), controlChannelType.CSOUND_CONTROL_CHANNEL);
+
+    }
+
+    @Override
+    public void updateValuesToCsound() {
+        for (int i = 0; i < testArr.length; i++) {
+            testArr[i].SetValue(0, csdTest);
+        }
+    }
+
+    @Override
+    public void updateValuesFromCsound() {}
+
+    @Override
+    public void cleanup() {
+        for (int i = 0; i < testArr.length; i++) {
+            testArr[i].Clear();
+            testArr[i] = null;
+        }
     }
 
     /**********************************************************************
