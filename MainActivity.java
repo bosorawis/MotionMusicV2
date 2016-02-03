@@ -26,10 +26,10 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+
 import com.csounds.CsoundObj;
+import com.csounds.CsoundObjListener;
 import com.csounds.bindings.CsoundBinding;
-import com.csounds.bindings.motion.CsoundMotion;
-import com.csounds.bindings.ui.CsoundUI;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -44,7 +44,6 @@ import java.util.Objects;
 import app.akexorcist.bluetotohspp.library.BluetoothSPP;
 import app.akexorcist.bluetotohspp.library.BluetoothState;
 import app.akexorcist.bluetotohspp.library.DeviceList;
-import csnd6.Csound;
 import csnd6.CsoundMYFLTArray;
 import csnd6.controlChannelType;
 
@@ -54,16 +53,17 @@ import csnd6.controlChannelType;
  * **Bluetooth
  * **Csound
  */
-public class MainActivity extends AppCompatActivity implements LeftHandFragment.OnFragmentInteractionListener, RightHandFragment.OnFragmentInteractionListener, CsoundBinding {
+public class MainActivity extends AppCompatActivity implements LeftHandFragment.OnFragmentInteractionListener, RightHandFragment.OnFragmentInteractionListener, CsoundObjListener,CsoundBinding {
     protected static String testVal = "hello";
     protected static String[] listitems = {"Volume", "Pitch", "Reverb"};
     static List<String> selectedItem = new ArrayList<String>();
-    CsoundMYFLTArray testArr[] = new CsoundMYFLTArray[1];
     /*
     Csound initialization
      */
-    protected CsoundObj csoundObj = new CsoundObj(false,true);
-    protected Handler handler = new Handler();
+    CsoundObj csoundObj = new CsoundObj();
+    CsoundMYFLTArray testArr[] = new CsoundMYFLTArray[1];
+
+    //protected Handler handler = new Handler();
     ToggleButton startStop;
     float csdTest = 0;
 
@@ -76,18 +76,12 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        /**
-         * CSD initialization
-         */
-        String csd = getResourceFileAsString(R.raw.test);
-        File f = createTempFile(csd);
-        csoundObj.addBinding(this);
-        csoundObj.startCsound(f);
-        //END CSD
+
 
         final Button testButton = (Button) findViewById(R.id.testButton);
         final Button checkButton = (Button) findViewById(R.id.checkVal);
         startStop = (ToggleButton) findViewById(R.id.onOffButton);
+        //testArr[0] = csoundObj.getInputChannelPtr(String.format("testValue.%d", 0), controlChannelType.CSOUND_CONTROL_CHANNEL);
 
         /*
         Here for testing csound
@@ -97,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
                     //testArr[0].SetValue(0, csdTest);
-                    Log.d("MainActivity","SEND PLAY TO CSD");
+                    Log.d("MainActivity", "SEND PLAY TO CSD");
                     csoundObj.sendScore(String.format("i1.%d 0 -2 %d", 0, 0));
                 }
                 else{
@@ -146,8 +140,11 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 Log.d("MainActivity", message);
                 csdTest += Float.parseFloat(message);
                 Log.d("MainActivity", "val: " + csdTest);
-                testArr[0].SetValue(0, csdTest);
-                csoundObj.sendScore(String.format("i1.%d 0 -2 %d", 0, 0));
+                if(testArr[0] != null) {
+                    //Log.d("Hello","Fuck you");
+                    testArr[0].SetValue(0, csdTest);
+                    //csoundObj.sendScore(String.format("i1.%d 0 -2 %d", 0, 0));
+                }
             }
         });
         //**********END BLUETOOTH*******************************//
@@ -182,6 +179,16 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             }
         });
         //TODO
+
+        /**
+         * CSD initialization
+         */
+        String csd = getResourceFileAsString(R.raw.test);
+        File f = createTempFile(csd);
+        csoundObj.addBinding(this);
+        Log.d("MainActivity", "this is " + String.valueOf(this));
+        csoundObj.startCsound(f);
+        //END CSD
         //Add Bluetooth connect button somewhere
     }
 
@@ -314,26 +321,20 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
         return f;
     }
-
-    public void csoundObjStarted(CsoundObj csoundObj) {}
-
-    public void csoundObjCompleted(CsoundObj csoundObj) {
-        handler.post(new Runnable() {
-            public void run() {
-                startStop.setChecked(false);
-            }
-        });
-    }
-
+    //TODO
+    //Csound isn't set up correctly
     @Override
     public void setup(CsoundObj csoundObj) {
         Log.d("MainActivity", "Setup");
-        testArr[0] = csoundObj.getInputChannelPtr(String.format("testValue.%d", 0), controlChannelType.CSOUND_CONTROL_CHANNEL);
+        testArr[0] = csoundObj.getInputChannelPtr(
+                String.format("testValue.%d", 0),
+                controlChannelType.CSOUND_CONTROL_CHANNEL);
 
     }
 
     @Override
     public void updateValuesToCsound() {
+        //Log.d("Well","What the actual fuck");
         for (int i = 0; i < testArr.length; i++) {
             testArr[i].SetValue(0, csdTest);
         }
@@ -348,6 +349,17 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             testArr[i].Clear();
             testArr[i] = null;
         }
+    }
+
+    @Override
+    public void csoundObjStarted(CsoundObj csoundObj) {
+        Log.d("MainActivity", "csoundObjStarted");
+    }
+
+    @Override
+    public void csoundObjCompleted(CsoundObj csoundObj) {
+        Log.d("MainActivity", "csoundObjCompleted");
+
     }
 
     /**********************************************************************
