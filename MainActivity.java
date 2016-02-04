@@ -336,7 +336,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     public void updateValuesToCsound() {
         //Log.d("Well","What the actual fuck");
         for (int i = 0; i < testArr.length; i++) {
-            testArr[i].SetValue(0, csdTest);
+            float send = csdTest/100;
+            testArr[i].SetValue(0, send);
         }
     }
 

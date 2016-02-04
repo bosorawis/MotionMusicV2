@@ -4,9 +4,11 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 
 /**
@@ -17,7 +19,7 @@ import android.view.ViewGroup;
  * Use the {@link RightHandFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RightHandFragment extends Fragment {
+public class RightHandFragment extends Fragment  {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -28,6 +30,15 @@ public class RightHandFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    //All the buttons
+    protected Button fw_back_btn;
+    protected Button tilt_btn;
+    protected Button turn_btn;
+    protected Button left_right_btn;
+    protected Button up_down_btn;
+    protected Button instrument_btn;
+
 
     public RightHandFragment() {
         // Required empty public constructor
@@ -64,6 +75,46 @@ public class RightHandFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
+        View view = inflater.inflate(R.layout.fragment_right_hand, container, false);
+        /**
+         * Button handler
+         */
+        fw_back_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("RightHandFragment", "fw_back_btn");
+            }
+        });
+
+        left_right_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("RightHandFragment", "left_right_btn");
+            }
+        });
+        up_down_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("RightHandFragment", "up_down_btn");
+            }
+        });
+        tilt_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("RightHandFragment", "tilt_btn");
+            }
+        });
+        turn_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("RightHandFragment", "turn_btn");
+            }
+        });
+        /**********************************************************
+         **********************************************************/
+
+
         return inflater.inflate(R.layout.fragment_right_hand, container, false);
     }
 
@@ -90,6 +141,7 @@ public class RightHandFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
+
 
     /**
      * This interface must be implemented by activities that contain this
