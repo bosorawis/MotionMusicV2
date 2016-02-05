@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,18 +29,20 @@ public class RightHandFragment extends Fragment  {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private FragmentActivity myContext;
 
     private OnFragmentInteractionListener mListener;
 
     //All the buttons
-    protected Button fw_back_btn;
-    protected Button tilt_btn;
-    protected Button turn_btn;
-    protected Button left_right_btn;
-    protected Button up_down_btn;
-    protected Button instrument_btn;
-
-
+    /*
+    protected Button fw_back_btn
+    protected Button tilt_btn
+    protected Button turn_btn
+    protected Button left_right_btn
+    protected Button up_down_btn
+    protected Button instrument_btn
+    protected Button asd_btn
+    */
     public RightHandFragment() {
         // Required empty public constructor
     }
@@ -80,10 +83,22 @@ public class RightHandFragment extends Fragment  {
         /**
          * Button handler
          */
+
+        Button fw_back_btn   = (Button) view.findViewById(R.id.rh_fw_back_btn);
+        Button tilt_btn   = (Button) view.findViewById(R.id.rh_tilt_btn);
+        Button turn_btn   = (Button) view.findViewById(R.id.rh_turn_btn);
+        Button left_right_btn   = (Button) view.findViewById(R.id.rh_left_right_btn);
+        Button up_down_btn   = (Button) view.findViewById(R.id.rh_up_down_btn);
+        Button instrument_btn   = (Button) view.findViewById(R.id.rh_instrument_btn);
+        //fw_back_btn.setOnClickListener(this);
+
         fw_back_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("RightHandFragment", "fw_back_btn");
+                android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
+                MainActivity.MyDialogFragment fragment = new MainActivity.MyDialogFragment();
+                fragment.show(fm, "dialog_test_fragment");
             }
         });
 
@@ -91,31 +106,53 @@ public class RightHandFragment extends Fragment  {
             @Override
             public void onClick(View v) {
                 Log.d("RightHandFragment", "left_right_btn");
+                android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
+                MainActivity.MyDialogFragment fragment = new MainActivity.MyDialogFragment();
+                fragment.show(fm, "dialog_test_fragment");
             }
         });
         up_down_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("RightHandFragment", "up_down_btn");
+                android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
+                MainActivity.MyDialogFragment fragment = new MainActivity.MyDialogFragment();
+                fragment.show(fm, "dialog_test_fragment");
             }
         });
         tilt_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("RightHandFragment", "tilt_btn");
+                android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
+                MainActivity.MyDialogFragment fragment = new MainActivity.MyDialogFragment();
+                fragment.show(fm, "dialog_test_fragment");
             }
         });
         turn_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("RightHandFragment", "turn_btn");
+                android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
+                MainActivity.MyDialogFragment fragment = new MainActivity.MyDialogFragment();
+                fragment.show(fm, "dialog_test_fragment");
+            }
+        });
+        instrument_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("RightHandFragment", "instrument_btn");
+                android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
+                MainActivity.MyDialogFragment fragment = new MainActivity.MyDialogFragment();
+                fragment.show(fm, "dialog_test_fragment");
             }
         });
         /**********************************************************
          **********************************************************/
 
 
-        return inflater.inflate(R.layout.fragment_right_hand, container, false);
+        //return inflater.inflate(R.layout.fragment_right_hand, container, false);
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -128,6 +165,8 @@ public class RightHandFragment extends Fragment  {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        myContext=(FragmentActivity) context;
+
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
