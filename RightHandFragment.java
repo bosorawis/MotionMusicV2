@@ -33,6 +33,12 @@ public class RightHandFragment extends Fragment  {
 
     private OnFragmentInteractionListener mListener;
 
+    /**
+     * Csound parameter handlers
+     */
+
+
+
     //All the buttons
     /*
     protected Button fw_back_btn
@@ -97,7 +103,7 @@ public class RightHandFragment extends Fragment  {
             public void onClick(View v) {
                 Log.d("RightHandFragment", "fw_back_btn");
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
-                MainActivity.MyDialogFragment fragment = new MainActivity.MyDialogFragment();
+                MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Forward - Backward");
                 fragment.show(fm, "dialog_test_fragment");
             }
         });
@@ -107,7 +113,7 @@ public class RightHandFragment extends Fragment  {
             public void onClick(View v) {
                 Log.d("RightHandFragment", "left_right_btn");
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
-                MainActivity.MyDialogFragment fragment = new MainActivity.MyDialogFragment();
+                MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Left - Right");
                 fragment.show(fm, "dialog_test_fragment");
             }
         });
@@ -116,7 +122,7 @@ public class RightHandFragment extends Fragment  {
             public void onClick(View v) {
                 Log.d("RightHandFragment", "up_down_btn");
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
-                MainActivity.MyDialogFragment fragment = new MainActivity.MyDialogFragment();
+                MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Up - Down");
                 fragment.show(fm, "dialog_test_fragment");
             }
         });
@@ -125,7 +131,7 @@ public class RightHandFragment extends Fragment  {
             public void onClick(View v) {
                 Log.d("RightHandFragment", "tilt_btn");
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
-                MainActivity.MyDialogFragment fragment = new MainActivity.MyDialogFragment();
+                MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Tilt");
                 fragment.show(fm, "dialog_test_fragment");
             }
         });
@@ -134,7 +140,7 @@ public class RightHandFragment extends Fragment  {
             public void onClick(View v) {
                 Log.d("RightHandFragment", "turn_btn");
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
-                MainActivity.MyDialogFragment fragment = new MainActivity.MyDialogFragment();
+                MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Pitch");
                 fragment.show(fm, "dialog_test_fragment");
             }
         });
@@ -143,8 +149,8 @@ public class RightHandFragment extends Fragment  {
             public void onClick(View v) {
                 Log.d("RightHandFragment", "instrument_btn");
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
-                MainActivity.MyDialogFragment fragment = new MainActivity.MyDialogFragment();
-                fragment.show(fm, "dialog_test_fragment");
+                InstrumentDialogFragment fragment = new InstrumentDialogFragment();
+                fragment.show(fm, "dialog_instrument_fragment");
             }
         });
         /**********************************************************

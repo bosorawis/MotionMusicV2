@@ -375,11 +375,23 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     public static class MyDialogFragment extends DialogFragment implements AdapterView.OnItemClickListener {
 
         ListView myList;
+
+        public MyDialogFragment(){
+            Log.d("DialogFragment","Constructure");
+        }
+        public static MyDialogFragment newInstance(String Name){
+            MyDialogFragment myFragment = new MyDialogFragment();
+            Bundle args = new Bundle();
+            args.putString("Name", Name);
+            myFragment.setArguments(args);
+            return myFragment;
+        }
         @Nullable
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View view = inflater.inflate(R.layout.dialog_test_fragment, null, false);
             myList = (ListView) view.findViewById(R.id.listView);
+            Log.d("DialogFragment",getArguments().getString("Name"));
             //getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
             getDialog().setTitle("Select Effect");
             return view;
