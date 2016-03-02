@@ -19,12 +19,31 @@ public class InstrumentDialogFragment extends DialogFragment implements AdapterV
 
 
     ListView InstrumentListView;
-    protected static String[] InstrumentList = {"Space", "Guitar", "Flute"};
+    protected final String[] InstrumentList = {
+            "Space",
+            "Guitar",
+            "Flute"
+    };
+
+    protected static String[] InstrumentDescription = {
+            "Spacy sound",       //Space
+            "Guitar sound",    //Guitar
+            "Flute sound",           //Flute
+    };
+    protected static int[] InstrumentImages = {
+            R.mipmap.ic_launcher, //Space
+            R.mipmap.ic_launcher, //Guitar
+            R.mipmap.ic_launcher, //Flute
+    };
+    protected String[] DisplayInstrumentList = InstrumentList;
+    protected String previous;
+    protected String caller;
+
 
     public InstrumentDialogFragment(){
         Log.d("InstrumentFragment", "Constructor");
     }
-
+    /*
     public static InstrumentDialogFragment newInstance(String Name){
         InstrumentDialogFragment myFragment = new InstrumentDialogFragment();
         Bundle args = new Bundle();
@@ -32,6 +51,7 @@ public class InstrumentDialogFragment extends DialogFragment implements AdapterV
         myFragment.setArguments(args);
         return myFragment;
     }
+    */
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -39,16 +59,32 @@ public class InstrumentDialogFragment extends DialogFragment implements AdapterV
         InstrumentListView = (ListView) view.findViewById(R.id.InstrumentList);
         //Log.d("DialogFragment",getArguments().getString("Name"));
         //getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        caller = this.getArguments().getString("caller");
+        previous = this.getArguments().getString("previous");
+
+        for(int i = 0 ; i<DisplayInstrumentList.length ; i++){
+            if(DisplayInstrumentList[i] == previous){
+                DisplayInstrumentList[i] = "Selected - " + InstrumentList[i];
+                break;
+            }
+        }
+
         getDialog().setTitle("Select Instrument");
         return view;
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        dismiss();
+        //dismiss();
         //selectedItem.add(listitems[position]);
+
+        view.setSelected(true);
         Toast.makeText(getActivity(), InstrumentList[position], Toast.LENGTH_SHORT)
                 .show();
+        //DisplayInstrumentList = InstrumentList;
+        //DisplayInstrumentList[position] = "Selected - " + InstrumentList[position];
+        ((MainActivity)getActivity()).dialogFragmentItemSelected(caller, InstrumentList[position]);
+        dismiss();
     }
 
     @Override
@@ -56,7 +92,13 @@ public class InstrumentDialogFragment extends DialogFragment implements AdapterV
         //Log.d("Popup", "onActivityCreated");
         super.onActivityCreated(savedInstanceState);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_list_item_1, InstrumentList);
+                android.R.layout.simple_list_item_1, DisplayInstrumentList);
+        /*CustomAdapter adapter = new CustomAdapter(
+                getActivity(),
+                InstrumentList,
+                InstrumentImages,
+                InstrumentDescription
+        );*/
 
         InstrumentListView.setAdapter(adapter);
 

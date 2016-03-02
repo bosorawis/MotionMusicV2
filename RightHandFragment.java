@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 
 /**
@@ -37,7 +38,12 @@ public class RightHandFragment extends Fragment  {
      * Csound parameter handlers
      */
 
-
+    TextView instr_txt;
+    TextView fwBack_txt;
+    TextView leftRight_txt;
+    TextView upDown_txt;
+    TextView pitch_txt;
+    TextView roll_txt;
 
     //All the buttons
     /*
@@ -90,66 +96,117 @@ public class RightHandFragment extends Fragment  {
          * Button handler
          */
 
-        Button fw_back_btn   = (Button) view.findViewById(R.id.rh_fw_back_btn);
-        Button tilt_btn   = (Button) view.findViewById(R.id.rh_tilt_btn);
-        Button turn_btn   = (Button) view.findViewById(R.id.rh_turn_btn);
+        Button fw_back_btn      = (Button) view.findViewById(R.id.rh_fw_back_btn);
+        Button pitch_btn         = (Button) view.findViewById(R.id.rh_pitch_btn);
+        Button roll_btn         = (Button) view.findViewById(R.id.rh_roll_btn);
         Button left_right_btn   = (Button) view.findViewById(R.id.rh_left_right_btn);
-        Button up_down_btn   = (Button) view.findViewById(R.id.rh_up_down_btn);
+        Button up_down_btn      = (Button) view.findViewById(R.id.rh_up_down_btn);
         Button instrument_btn   = (Button) view.findViewById(R.id.rh_instrument_btn);
+        /**
+         * Text Views
+         */
+        TextView instr_txt      = (TextView) view.findViewById(R.id.instText);
+        TextView fwBack_txt     = (TextView) view.findViewById(R.id.fwBackText);
+        TextView leftRight_txt  = (TextView) view.findViewById(R.id.leftRightText);
+        TextView upDown_txt     = (TextView) view.findViewById(R.id.upDownText);
+        TextView pitch_txt      = (TextView) view.findViewById(R.id.pitchText);
+        TextView roll_txt       = (TextView) view.findViewById(R.id.rollText);
+        instr_txt.setText(MainActivity.rightHand.getInstrument());
+        fwBack_txt.setText(MainActivity.rightHand.getEffect(0));
+        upDown_txt.setText(MainActivity.rightHand.getEffect(1));
+        leftRight_txt.setText(MainActivity.rightHand.getEffect(2));
+        pitch_txt.setText(MainActivity.rightHand.getEffect(3));
+        roll_txt.setText(MainActivity.rightHand.getEffect(4));
+
         //fw_back_btn.setOnClickListener(this);
+
 
         fw_back_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("RightHandFragment", "fw_back_btn");
+                //Log.d("RightHandFragment", "fw_back_btn");
+                //Bundle to pass arguments to the dialogFragment
+                Bundle bundle = setBundle("R_fb");
+                //String caller = "R_fb";
+                //bundle.putString("caller",caller);
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
-                MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Forward - Backward");
-                fragment.show(fm, "dialog_test_fragment");
+                //MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Forward - Backward");
+                EffectDialogFragment  fragment= new EffectDialogFragment();
+                fragment.setArguments(bundle);
+                fragment.show(fm, "dialog_effect_fragment");
             }
         });
 
         left_right_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("RightHandFragment", "left_right_btn");
+                //Log.d("RightHandFragment", "left_right_btn");
+                Bundle bundle = setBundle("R_lr");
+                //String caller = "R_lr";
+                //bundle.putString("caller",caller);
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
-                MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Left - Right");
-                fragment.show(fm, "dialog_test_fragment");
+                //MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Left - Right");
+                EffectDialogFragment  fragment= new EffectDialogFragment();
+                fragment.setArguments(bundle);
+
+                fragment.show(fm, "dialog_effect_fragment");
             }
         });
         up_down_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("RightHandFragment", "up_down_btn");
+                //Log.d("RightHandFragment", "up_down_btn");
+                Bundle bundle = setBundle("R_ud");
+                //String caller = "R_ud";
+                //bundle.putString("caller",caller);
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
-                MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Up - Down");
-                fragment.show(fm, "dialog_test_fragment");
+                //MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Up - Down");
+                EffectDialogFragment  fragment= new EffectDialogFragment();
+                fragment.setArguments(bundle);
+
+                fragment.show(fm, "dialog_effect_fragment");
             }
         });
-        tilt_btn.setOnClickListener(new View.OnClickListener() {
+        pitch_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("RightHandFragment", "tilt_btn");
+                //Log.d("RightHandFragment", "tilt_btn");
+                Bundle bundle = setBundle("R_pitch");
+                //String caller = "R_pitch";
+                //bundle.putString("caller",caller);
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
-                MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Tilt");
-                fragment.show(fm, "dialog_test_fragment");
+                //MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Tilt");
+                EffectDialogFragment  fragment= new EffectDialogFragment();
+                fragment.setArguments(bundle);
+
+                fragment.show(fm, "dialog_effect_fragment");
             }
         });
-        turn_btn.setOnClickListener(new View.OnClickListener() {
+        roll_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("RightHandFragment", "turn_btn");
+                //Log.d("RightHandFragment", "turn_btn");
+                Bundle bundle = setBundle("R_roll");
+                //String caller = "R_roll";
+                //bundle.putString("caller",caller);
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
-                MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Pitch");
-                fragment.show(fm, "dialog_test_fragment");
+                //MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Pitch");
+                EffectDialogFragment  fragment= new EffectDialogFragment();
+                fragment.setArguments(bundle);
+                fragment.show(fm, "dialog_effect_fragment");
             }
         });
         instrument_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("RightHandFragment", "instrument_btn");
+                //Log.d("RightHandFragment", "instrument_btn");
+                Bundle bundle = new Bundle();
+                String caller = "R_inst";
+                bundle.putString("caller",caller);
+                bundle.putString("previous",MainActivity.rightHand.getInstrument());
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
                 InstrumentDialogFragment fragment = new InstrumentDialogFragment();
+                fragment.setArguments(bundle);
                 fragment.show(fm, "dialog_instrument_fragment");
             }
         });
@@ -157,7 +214,6 @@ public class RightHandFragment extends Fragment  {
          **********************************************************/
 
 
-        //return inflater.inflate(R.layout.fragment_right_hand, container, false);
         return view;
     }
 
@@ -167,7 +223,19 @@ public class RightHandFragment extends Fragment  {
             mListener.onFragmentInteraction(uri);
         }
     }
+    public Bundle setBundle(String caller){
+        Bundle bundle = new Bundle();
 
+        bundle.putString("caller",caller);
+
+        bundle.putString("R_fw_selected",MainActivity.rightHand.getEffect(0));
+        bundle.putString("R_ud_selected",MainActivity.rightHand.getEffect(1));
+        bundle.putString("R_lr_selected",MainActivity.rightHand.getEffect(2));
+        bundle.putString("R_pitch_selected",MainActivity.rightHand.getEffect(3));
+        bundle.putString("R_roll_selected",MainActivity.rightHand.getEffect(4));
+
+        return bundle;
+    }
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -201,5 +269,13 @@ public class RightHandFragment extends Fragment  {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+    public void setAllText(){
+        instr_txt.setText(MainActivity.rightHand.getInstrument());
+        fwBack_txt.setText(MainActivity.rightHand.getEffect(0));
+        upDown_txt.setText(MainActivity.rightHand.getEffect(1));
+        leftRight_txt.setText(MainActivity.rightHand.getEffect(2));
+        pitch_txt.setText(MainActivity.rightHand.getEffect(3));
+        roll_txt.setText(MainActivity.rightHand.getEffect(4));
     }
 }

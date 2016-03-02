@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -23,6 +24,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -54,14 +56,45 @@ import csnd6.controlChannelType;
  * **Csound
  */
 public class MainActivity extends AppCompatActivity implements LeftHandFragment.OnFragmentInteractionListener, RightHandFragment.OnFragmentInteractionListener, CsoundObjListener,CsoundBinding {
-    protected static String testVal = "hello";
-    protected static String[] listitems = {"Volume", "Pitch", "Reverb"};
-    static List<String> selectedItem = new ArrayList<String>();
-    /*
-    Csound initialization
+    public static Hands rightHand = new Hands();
+    /**
+     * Variable for Csound
      */
+
+    private static final int NONE       = 0;
+    private static final int VOLUME     = 1;
+    private static final int FREQUENCY  = 2;
+    private static final int REVERB     = 3;
+    private static final int DELAY      = 4;
+    private static final int FLANGER    = 5;
+    private static final int DISTORTION = 6;
+    private static final int ROTARY     = 7;
+
+    private static final int PITCH_DATA   = 0;
+    private static final int ROLL_DATA    = 1;
+    private static final int X_ACCEL_DATA = 2;
+    private static final int Y_ACCEL_DATA = 3;
+    private static final int Z_ACCEL_DATA = 4;
+
+    private  float r_volume = (float) 0.0;
+    private  float r_freq = (float) 0.0;
+
+    String rightHandCurrent[] = rightHand.getAllEffect();
+
+    int r_pitchData;
+    int r_rollData;
+    int r_x_accelData;
+    int r_y_accelData;
+    int r_z_accelData;
+
+    static List<String> selectedItem = new ArrayList<String>();
+    /************************
+    Csound initialization
+     ************************/
     CsoundObj csoundObj = new CsoundObj();
-    CsoundMYFLTArray testArr[] = new CsoundMYFLTArray[1];
+    //Structure:
+    //l_inst, l_fw, l_ud, l_lr, l_tl, l_tn, r_inst, r_fw, r_ud, r_lr, r_
+    CsoundMYFLTArray testArr[] = new CsoundMYFLTArray[2];
 
     //protected Handler handler = new Handler();
     ToggleButton startStop;
@@ -71,18 +104,26 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     protected  BluetoothSPP bt;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        rightHand.setInstrument("Space");
+        rightHand.setEffects(0, "Delay");
+        rightHand.setEffects(1,"Reverb");
+        rightHand.setEffects(2,"Flanger");
+        rightHand.setEffects(3,"Frequency");
+        rightHand.setEffects(4,"Volume");
+
+        //selectedRightHandEffect = rightHand.getAllEffect();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
+        //TODO
+        //Default value hard coded for testing
 
         final Button testButton = (Button) findViewById(R.id.testButton);
         final Button checkButton = (Button) findViewById(R.id.checkVal);
         startStop = (ToggleButton) findViewById(R.id.onOffButton);
-        //testArr[0] = csoundObj.getInputChannelPtr(String.format("testValue.%d", 0), controlChannelType.CSOUND_CONTROL_CHANNEL);
-
         /*
         Here for testing csound
          */
@@ -130,21 +171,39 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                         , "Unable to connect", Toast.LENGTH_SHORT).show();
             }
         });
-        //TODO
         /**
          * Data receive method
          */
         bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
             public void onDataReceived(byte[] data, String message) {
                 //Toast.makeText(SimpleActivity.this, message, Toast.LENGTH_SHORT).show();
-                Log.d("MainActivity", message);
-                csdTest += Float.parseFloat(message);
-                Log.d("MainActivity", "val: " + csdTest);
-                if(testArr[0] != null) {
-                    //Log.d("Hello","Fuck you");
-                    testArr[0].SetValue(0, csdTest);
-                    //csoundObj.sendScore(String.format("i1.%d 0 -2 %d", 0, 0));
+                //Log.d("MainActivity", message);
+
+                //TODO
+                //data[] is 5 bytes long
+                // data[0] - 90     pitch
+                // data[1] - 90     roll
+                // data[2] - 100    x_speed
+                // data[3] - 100    y_speed
+                // data[4] - 100    z_speed
+
+                r_pitchData   =  data[PITCH_DATA];
+                r_rollData    =  data[ROLL_DATA];
+                //r_x_accelData =  data[2];
+                //r_y_accelData =  data[3];
+                //r_z_accelData =  data[4];
+                for (int i = 0 ; i < rightHandCurrent.length ; i++){
+                    switch (rightHandCurrent[i]){
+                        //case
+                    }
                 }
+
+                //csdTest += Float.parseFloat(message);
+                //Log.d("MainActivity", "val: " + csdTest);
+                //for(int i = 0 ; i < testArr.length ; i++) {
+                //    if (testArr[i] != null) {
+                        //Log.d("Hello","Fuck you");
+                //testArr[0].SetValue(0, csdTest);
             }
         });
         //**********END BLUETOOTH*******************************//
@@ -152,23 +211,16 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             @Override
             public void onClick(View v) {
                 //Show the dialog
-                Log.d("Main", "Yay");
-                android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
-                MyDialogFragment fragment = new MyDialogFragment();
-                fragment.show(fm, "dialog_test_fragment");
+                //rightHand.showSelected();
+                int[] byteArrayTest = new int[]{0xFD, 0x2D, 0x64, 0x64, 0x64 };
+                int testValue = byteArrayTest[0];
+                Log.d("testButtonClick", "Byte:" + Integer.toString(testValue - 128));
             }
         });
         checkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                /*
-                int i;
-                Log.d("Selected Value",testVal);
-                for (i = 0 ; i < selectedItem.size() ; i++){
-                    Log.d("Value: ", selectedItem.get(i));
-                }
-                */
                 if (bt.getServiceState() == BluetoothState.STATE_CONNECTED) {
                     bt.disconnect();
                 } else {
@@ -178,7 +230,6 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
             }
         });
-        //TODO
 
         /**
          * CSD initialization
@@ -186,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         String csd = getResourceFileAsString(R.raw.test);
         File f = createTempFile(csd);
         csoundObj.addBinding(this);
-        Log.d("MainActivity", "this is " + String.valueOf(this));
+        //Log.d("MainActivity", "this is " + String.valueOf(this));
         csoundObj.startCsound(f);
         //END CSD
         //Add Bluetooth connect button somewhere
@@ -321,23 +372,66 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
         return f;
     }
-    //TODO
-    //Csound isn't set up correctly
     @Override
     public void setup(CsoundObj csoundObj) {
         Log.d("MainActivity", "Setup");
-        testArr[0] = csoundObj.getInputChannelPtr(
-                String.format("testValue.%d", 0),
-                controlChannelType.CSOUND_CONTROL_CHANNEL);
+        //for (int i = 0; i < testArr.length; i++) {
+
+        testArr[0] = csoundObj.getInputChannelPtr(String.format("frequency_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
+        testArr[1] = csoundObj.getInputChannelPtr(String.format("volume_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
 
     }
 
     @Override
     public void updateValuesToCsound() {
         //Log.d("Well","What the actual fuck");
-        for (int i = 0; i < testArr.length; i++) {
-            float send = csdTest/100;
-            testArr[i].SetValue(0, send);
+        //for (int i = 0; i < testArr.length; i++) {
+        //    float send = csdTest/100;
+        //    //if(send>=1){
+        //     //   send = 1;
+        //    //}
+        //    testArr[i].SetValue(0, send);
+        //    //freqArr[0].SetValue(0, send);
+        //}
+
+
+        //Write test value for all effects
+        //Use switch statement to determine which effects to be operated on
+        //Run a loop before SetValue
+        //Be fucking careful with how much delay it introduce
+        //Possible issue with race condition
+        //Log.d("UpdateValue", Float.toString(csdTest));
+
+        testArr[0].SetValue(0, csdTest/100);
+        testArr[1].SetValue(0, 1.0);
+    }
+
+    private void dataProc(Byte data, int id){
+        String currentOption[] = rightHand.getAllEffect();
+        int readData = data;
+        float finalData;
+        for(int i = 0 ; i < currentOption.length ; i++){
+            Log.d("dataProc", currentOption[i]);
+            switch(currentOption[i]){
+                case "Volume":
+
+                    break;
+                case "Frequency":
+                    break;
+                case "Reverb":
+                    break;
+                case "Delay":
+                    break;
+                case "Flanger":
+                    break;
+                case "Distortion":
+                    break;
+                case "Rotary":
+                    break;
+                default:
+                    Log.d("MainActivity", "WTF!!!");
+                    break;
+            }
         }
     }
 
@@ -363,63 +457,57 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
     }
 
+
     /**********************************************************************
                     End of Csound external handler
      * *******************************************************************/
 
 
-    /**
-     * DialogFragment class
-     * Created by Sorawis on 1/26/2016.
-     */
-    public static class MyDialogFragment extends DialogFragment implements AdapterView.OnItemClickListener {
-
-        ListView myList;
-
-        public MyDialogFragment(){
-            Log.d("DialogFragment","Constructure");
-        }
-        public static MyDialogFragment newInstance(String Name){
-            MyDialogFragment myFragment = new MyDialogFragment();
-            Bundle args = new Bundle();
-            args.putString("Name", Name);
-            myFragment.setArguments(args);
-            return myFragment;
-        }
-        @Nullable
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.dialog_test_fragment, null, false);
-            myList = (ListView) view.findViewById(R.id.listView);
-            Log.d("DialogFragment",getArguments().getString("Name"));
-            //getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-            getDialog().setTitle("Select Effect");
-            return view;
-        }
-
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            dismiss();
-            testVal = listitems[position];
-            selectedItem.add(listitems[position]);
-            Toast.makeText(getActivity(), listitems[position], Toast.LENGTH_SHORT)
-                    .show();
-        }
-
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState) {
-            //Log.d("Popup", "onActivityCreated");
-            super.onActivityCreated(savedInstanceState);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_list_item_1, listitems);
-
-            myList.setAdapter(adapter);
-
-            myList.setOnItemClickListener(this);
-
+    public void dialogFragmentItemSelected(String param, String selectedItem){
+        Log.d("dfItemSelected", param+":" + selectedItem);
+        TextView txt;
+        switch(param){
+            case "R_inst":
+                txt = (TextView) findViewById(R.id.instText);
+                txt.setText(selectedItem);
+                rightHand.setInstrument(selectedItem);
+                break;
+            case "R_fb":
+                txt = (TextView) findViewById(R.id.fwBackText);
+                txt.setText(selectedItem);
+                rightHand.setEffects(0, selectedItem);
+                break;
+            case "R_ud":
+                txt = (TextView) findViewById(R.id.upDownText);
+                txt.setText(selectedItem);
+                rightHand.setEffects(1, selectedItem);
+                break;
+            case "R_lr":
+                txt = (TextView) findViewById(R.id.leftRightText);
+                txt.setText(selectedItem);
+                rightHand.setEffects(2, selectedItem);
+                break;
+            case "R_pitch":
+                txt = (TextView) findViewById(R.id.pitchText);
+                txt.setText(selectedItem);
+                rightHand.setEffects(3, selectedItem);
+                break;
+            case "R_roll":
+                txt = (TextView) findViewById(R.id.rollText);
+                txt.setText(selectedItem);
+                rightHand.setEffects(4, selectedItem);
+                break;
+            default:
+                break;
         }
     }
      /*********************************************************************
                     End of MyDialogFragment
      *********************************************************************/
 }
+/**
+ * Design to deal with the data proc
+ * Use getEffect Statement
+ * Do String compared
+ *
+ **/
