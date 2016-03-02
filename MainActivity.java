@@ -201,13 +201,13 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
                     Log.d("OnReceive","r_pitchData: " + Integer.toString(pitchData) );
                     Log.d("OnReceive","r_rollData: "  + Integer.toString(rollData));
-
+                    dataProc(data);
                     //r_x_accelData =  data[2];
                     //r_y_accelData =  data[3];
                     //r_z_accelData =  data[4];
-                    for (int i = 0; i < rightHandCurrent.length; i++) {
-                        dataProc(data[i],i);
-                    }
+                    //for (int i = 0; i < rightHandCurrent.length; i++) {
+                    //    dataProc(data[i],i);
+                    //}
                 }
                 //csdTest += Float.parseFloat(message);
                 //Log.d("MainActivity", "val: " + csdTest);
@@ -413,32 +413,33 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         //Possible issue with race condition
         //Log.d("UpdateValue", Float.toString(csdTest));
 
-        testArr[0].SetValue(0, 0.1);
-        testArr[1].SetValue(0, 0.8);
+        testArr[0].SetValue(0, freq);
+        testArr[1].SetValue(0, volume);
     }
     //TODO
     //Fix the processing correctly
-    private void dataProc(Byte data, int id){
+    private void dataProc(byte[] data){
         int currentOption[] = rightHand.getAllEffect();
-        int readData = data;
         float finalData = 0;
-        if(id <= 1){
-            finalData = readData/90;
-        }
-        else{
-            finalData = readData/100;
-        }
+        int readData;
         for(int i = 0 ; i < currentOption.length ; i++){
             Log.d("dataProc", Integer.toString(currentOption[i]));
+            readData = data[i];
+            if(i <= 1){
+                finalData = (float)readData/90;
+            }
+            else{
+                finalData = (float)readData/100;
+            }
             switch(currentOption[i]){
                 case NONE:
                     break;
                 case VOLUME:
-                    Log.d("dataProc","volume");
+                    Log.d("dataProc","volume:" + Float.toString(finalData));
                     volume = finalData;
                     break;
                 case FREQUENCY:
-                    Log.d("dataProc","freq");
+                    Log.d("dataProc","freq:" + Float.toString(finalData));
                     freq  = finalData;
                     break;
                 case REVERB:
@@ -455,6 +456,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                     Log.d("MainActivity", "WTF!!!");
                     break;
             }
+            finalData = 0;
+
         }
     }
 
