@@ -83,7 +83,7 @@ public class InstrumentDialogFragment extends DialogFragment implements AdapterV
                 .show();
         //DisplayInstrumentList = InstrumentList;
         //DisplayInstrumentList[position] = "Selected - " + InstrumentList[position];
-        ((MainActivity)getActivity()).dialogFragmentItemSelected(caller, InstrumentList[position]);
+        ((MainActivity)getActivity()).dialogFragmentItemSelected(caller, position);
         dismiss();
     }
 

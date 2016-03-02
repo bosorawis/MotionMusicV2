@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -70,22 +71,27 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     private static final int DISTORTION = 6;
     private static final int ROTARY     = 7;
 
+    private static final int SPACY      = 1000;
+    private static final int GUITAR     = 1001;
+    private static final int FLUTE      = 1002;
+
+
     private static final int PITCH_DATA   = 0;
     private static final int ROLL_DATA    = 1;
     private static final int X_ACCEL_DATA = 2;
     private static final int Y_ACCEL_DATA = 3;
     private static final int Z_ACCEL_DATA = 4;
 
-    private  float r_volume = (float) 0.0;
-    private  float r_freq = (float) 0.0;
+    private  float volume = (float) 0.0;
+    private  float freq = (float) 0.0;
 
-    String rightHandCurrent[] = rightHand.getAllEffect();
+    int rightHandCurrent[] = rightHand.getAllEffect();
 
-    int r_pitchData;
-    int r_rollData;
-    int r_x_accelData;
-    int r_y_accelData;
-    int r_z_accelData;
+    int pitchData;
+    int rollData;
+    int x_accelData;
+    int y_accelData;
+    int z_accelData;
 
     static List<String> selectedItem = new ArrayList<String>();
     /************************
@@ -104,12 +110,12 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     protected  BluetoothSPP bt;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        rightHand.setInstrument("Space");
-        rightHand.setEffects(0, "Delay");
-        rightHand.setEffects(1,"Reverb");
-        rightHand.setEffects(2,"Flanger");
-        rightHand.setEffects(3,"Frequency");
-        rightHand.setEffects(4,"Volume");
+        rightHand.setInstrument(SPACY);
+        rightHand.setEffects(0, DELAY);
+        rightHand.setEffects(1, REVERB);
+        rightHand.setEffects(2, FLANGER);
+        rightHand.setEffects(3, FREQUENCY);
+        rightHand.setEffects(4, VOLUME);
 
         //selectedRightHandEffect = rightHand.getAllEffect();
 
@@ -187,17 +193,22 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 // data[3] - 100    y_speed
                 // data[4] - 100    z_speed
 
-                r_pitchData   =  data[PITCH_DATA];
-                r_rollData    =  data[ROLL_DATA];
-                //r_x_accelData =  data[2];
-                //r_y_accelData =  data[3];
-                //r_z_accelData =  data[4];
-                for (int i = 0 ; i < rightHandCurrent.length ; i++){
-                    switch (rightHandCurrent[i]){
-                        //case
+
+                if(data.length>=2) {
+
+                    pitchData = data[PITCH_DATA];
+                    rollData = data[ROLL_DATA];
+
+                    Log.d("OnReceive","r_pitchData: " + Integer.toString(pitchData) );
+                    Log.d("OnReceive","r_rollData: "  + Integer.toString(rollData));
+
+                    //r_x_accelData =  data[2];
+                    //r_y_accelData =  data[3];
+                    //r_z_accelData =  data[4];
+                    for (int i = 0; i < rightHandCurrent.length; i++) {
+                        dataProc(data[i],i);
                     }
                 }
-
                 //csdTest += Float.parseFloat(message);
                 //Log.d("MainActivity", "val: " + csdTest);
                 //for(int i = 0 ; i < testArr.length ; i++) {
@@ -402,31 +413,43 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         //Possible issue with race condition
         //Log.d("UpdateValue", Float.toString(csdTest));
 
-        testArr[0].SetValue(0, csdTest/100);
-        testArr[1].SetValue(0, 1.0);
+        testArr[0].SetValue(0, 0.1);
+        testArr[1].SetValue(0, 0.8);
     }
-
+    //TODO
+    //Fix the processing correctly
     private void dataProc(Byte data, int id){
-        String currentOption[] = rightHand.getAllEffect();
+        int currentOption[] = rightHand.getAllEffect();
         int readData = data;
-        float finalData;
+        float finalData = 0;
+        if(id <= 1){
+            finalData = readData/90;
+        }
+        else{
+            finalData = readData/100;
+        }
         for(int i = 0 ; i < currentOption.length ; i++){
-            Log.d("dataProc", currentOption[i]);
+            Log.d("dataProc", Integer.toString(currentOption[i]));
             switch(currentOption[i]){
-                case "Volume":
-
+                case NONE:
                     break;
-                case "Frequency":
+                case VOLUME:
+                    Log.d("dataProc","volume");
+                    volume = finalData;
                     break;
-                case "Reverb":
+                case FREQUENCY:
+                    Log.d("dataProc","freq");
+                    freq  = finalData;
                     break;
-                case "Delay":
+                case REVERB:
                     break;
-                case "Flanger":
+                case DELAY:
                     break;
-                case "Distortion":
+                case FLANGER:
                     break;
-                case "Rotary":
+                case DISTORTION:
+                    break;
+                case ROTARY:
                     break;
                 default:
                     Log.d("MainActivity", "WTF!!!");
@@ -463,38 +486,38 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
      * *******************************************************************/
 
 
-    public void dialogFragmentItemSelected(String param, String selectedItem){
+    public void dialogFragmentItemSelected(String param, int selectedItem){
         Log.d("dfItemSelected", param+":" + selectedItem);
         TextView txt;
         switch(param){
             case "R_inst":
                 txt = (TextView) findViewById(R.id.instText);
-                txt.setText(selectedItem);
+                txt.setText(getDefinedString(selectedItem));
                 rightHand.setInstrument(selectedItem);
                 break;
             case "R_fb":
                 txt = (TextView) findViewById(R.id.fwBackText);
-                txt.setText(selectedItem);
+                txt.setText(getDefinedString(selectedItem));
                 rightHand.setEffects(0, selectedItem);
                 break;
             case "R_ud":
                 txt = (TextView) findViewById(R.id.upDownText);
-                txt.setText(selectedItem);
+                txt.setText(getDefinedString(selectedItem));
                 rightHand.setEffects(1, selectedItem);
                 break;
             case "R_lr":
                 txt = (TextView) findViewById(R.id.leftRightText);
-                txt.setText(selectedItem);
+                txt.setText(getDefinedString(selectedItem));
                 rightHand.setEffects(2, selectedItem);
                 break;
             case "R_pitch":
                 txt = (TextView) findViewById(R.id.pitchText);
-                txt.setText(selectedItem);
+                txt.setText(getDefinedString(selectedItem));
                 rightHand.setEffects(3, selectedItem);
                 break;
             case "R_roll":
                 txt = (TextView) findViewById(R.id.rollText);
-                txt.setText(selectedItem);
+                txt.setText(getDefinedString(selectedItem));
                 rightHand.setEffects(4, selectedItem);
                 break;
             default:
@@ -504,10 +527,32 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
      /*********************************************************************
                     End of MyDialogFragment
      *********************************************************************/
+    public String getDefinedString(int data){
+        switch (data){
+            case NONE:
+                return "None";
+            case VOLUME:
+                return "Volume";
+            case FREQUENCY:
+                return "Frequency";
+            case REVERB:
+                return "Reverb";
+            case DELAY:
+                return "Delay";
+            case FLANGER:
+                return "Flanger";
+            case DISTORTION:
+                return "Distortion";
+            case ROTARY:
+                return "Rotary";
+            case SPACY:
+                return "Spacy";
+            case GUITAR:
+                return "Guitar";
+            case FLUTE:
+                return "Flute";
+            default:
+                return null;
+        }
+    }
 }
-/**
- * Design to deal with the data proc
- * Use getEffect Statement
- * Do String compared
- *
- **/

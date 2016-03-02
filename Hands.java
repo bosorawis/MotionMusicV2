@@ -14,39 +14,78 @@ public class Hands {
      * 3 = pitch (tilt forward)
      * 4 = roll (tilt LR)
      */
-    private String[] Effects;
-    private String Instrument;
+
+    private static final int NONE       = 0;
+    private static final int VOLUME     = 1;
+    private static final int FREQUENCY  = 2;
+    private static final int REVERB     = 3;
+    private static final int DELAY      = 4;
+    private static final int FLANGER    = 5;
+    private static final int DISTORTION = 6;
+    private static final int ROTARY     = 7;
+    private static final int SPACY      = 1000;
+    private static final int GUITAR     = 1001;
+    private static final int FLUTE      = 1002;
+    private int[] Effects;
+    private int Instrument;
 
     public Hands() {
-        Effects = new String[5];
-        Instrument = "Space";
-        Effects[0] = null;
-        Effects[1] = null;
-        Effects[2] = null;
-        Effects[3] = null;
-        Effects[4] = null;
+        Effects = new int[5];
+        Instrument = 1000;
+        Effects[0] = 0;
+        Effects[1] = 0;
+        Effects[2] = 0;
+        Effects[3] = 0;
+        Effects[4] = 0;
     }
 
-    public void setInstrument(String instrument){
+    public void setInstrument(int instrument){
         Instrument = instrument;
     }
-    public String getInstrument(){
+    public int  getInstrument(){
         return Instrument;
     }
-    public void setEffects(int id, String effect){
+    public void setEffects(int id, int effect){
         Effects[id] = effect;
     }
-    public String getEffect(int id){
+    public int getEffect(int id){
         return Effects[id];
     }
-    public String[] getAllEffect(){
+    public int[] getAllEffect(){
         return Effects;
     }
     public void showSelected(){
         for(int i = 0 ; i < Effects.length;  i++){
-            Log.d("Hands ","["+ Integer.toString(i) + "]: " + Effects[i] );
+            Log.d("Hands ","["+ Integer.toString(i) + "]: " + getDefinedString(Effects[i]) );
         }
-        Log.d("Hands ", Instrument);
+        Log.d("Hands ", getDefinedString(Instrument));
     }
-
+    public String getDefinedString(int data){
+        switch (data){
+            case NONE:
+                return "None";
+            case VOLUME:
+                return "Volume";
+            case FREQUENCY:
+                return "Frequency";
+            case REVERB:
+                return "Reverb";
+            case DELAY:
+                return "Delay";
+            case FLANGER:
+                return "Flanger";
+            case DISTORTION:
+                return "Distortion";
+            case ROTARY:
+                return "Rotary";
+            case SPACY:
+                return "Spacy";
+            case GUITAR:
+                return "Guitar";
+            case FLUTE:
+                return "Flute";
+            default:
+                return null;
+        }
+    }
 }

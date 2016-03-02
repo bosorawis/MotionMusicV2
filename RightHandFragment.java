@@ -24,6 +24,19 @@ import android.widget.TextView;
 public class RightHandFragment extends Fragment  {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final int NONE       = 0;
+    private static final int VOLUME     = 1;
+    private static final int FREQUENCY  = 2;
+    private static final int REVERB     = 3;
+    private static final int DELAY      = 4;
+    private static final int FLANGER    = 5;
+    private static final int DISTORTION = 6;
+    private static final int ROTARY     = 7;
+
+    private static final int SPACY      = 1000;
+    private static final int GUITAR     = 1001;
+    private static final int FLUTE      = 1002;
+
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -111,12 +124,13 @@ public class RightHandFragment extends Fragment  {
         TextView upDown_txt     = (TextView) view.findViewById(R.id.upDownText);
         TextView pitch_txt      = (TextView) view.findViewById(R.id.pitchText);
         TextView roll_txt       = (TextView) view.findViewById(R.id.rollText);
-        instr_txt.setText(MainActivity.rightHand.getInstrument());
-        fwBack_txt.setText(MainActivity.rightHand.getEffect(0));
-        upDown_txt.setText(MainActivity.rightHand.getEffect(1));
-        leftRight_txt.setText(MainActivity.rightHand.getEffect(2));
-        pitch_txt.setText(MainActivity.rightHand.getEffect(3));
-        roll_txt.setText(MainActivity.rightHand.getEffect(4));
+
+        instr_txt.setText(getDefinedString(MainActivity.rightHand.getInstrument()));
+        fwBack_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(0)));
+        upDown_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(1)));
+        leftRight_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(2)));
+        pitch_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(3)));
+        roll_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(4)));
 
         //fw_back_btn.setOnClickListener(this);
 
@@ -203,7 +217,7 @@ public class RightHandFragment extends Fragment  {
                 Bundle bundle = new Bundle();
                 String caller = "R_inst";
                 bundle.putString("caller",caller);
-                bundle.putString("previous",MainActivity.rightHand.getInstrument());
+                bundle.putString("previous",getDefinedString(MainActivity.rightHand.getInstrument()));
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
                 InstrumentDialogFragment fragment = new InstrumentDialogFragment();
                 fragment.setArguments(bundle);
@@ -228,11 +242,11 @@ public class RightHandFragment extends Fragment  {
 
         bundle.putString("caller",caller);
 
-        bundle.putString("R_fw_selected",MainActivity.rightHand.getEffect(0));
-        bundle.putString("R_ud_selected",MainActivity.rightHand.getEffect(1));
-        bundle.putString("R_lr_selected",MainActivity.rightHand.getEffect(2));
-        bundle.putString("R_pitch_selected",MainActivity.rightHand.getEffect(3));
-        bundle.putString("R_roll_selected",MainActivity.rightHand.getEffect(4));
+        bundle.putInt("R_fw_selected", MainActivity.rightHand.getEffect(0));
+        bundle.putInt("R_ud_selected", MainActivity.rightHand.getEffect(1));
+        bundle.putInt("R_lr_selected", MainActivity.rightHand.getEffect(2));
+        bundle.putInt("R_pitch_selected", MainActivity.rightHand.getEffect(3));
+        bundle.putInt("R_roll_selected",MainActivity.rightHand.getEffect(4));
 
         return bundle;
     }
@@ -271,11 +285,41 @@ public class RightHandFragment extends Fragment  {
         void onFragmentInteraction(Uri uri);
     }
     public void setAllText(){
-        instr_txt.setText(MainActivity.rightHand.getInstrument());
-        fwBack_txt.setText(MainActivity.rightHand.getEffect(0));
-        upDown_txt.setText(MainActivity.rightHand.getEffect(1));
-        leftRight_txt.setText(MainActivity.rightHand.getEffect(2));
-        pitch_txt.setText(MainActivity.rightHand.getEffect(3));
-        roll_txt.setText(MainActivity.rightHand.getEffect(4));
+        instr_txt.setText(getDefinedString(MainActivity.rightHand.getInstrument()));
+        fwBack_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(0)));
+        upDown_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(1)));
+        leftRight_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(2)));
+        pitch_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(3)));
+        roll_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(4)));
+    }
+
+
+    public String getDefinedString(int data){
+        switch (data){
+            case NONE:
+                return "None";
+            case VOLUME:
+                return "Volume";
+            case FREQUENCY:
+                return "Frequency";
+            case REVERB:
+                return "Reverb";
+            case DELAY:
+                return "Delay";
+            case FLANGER:
+                return "Flanger";
+            case DISTORTION:
+                return "Distortion";
+            case ROTARY:
+                return "Rotary";
+            case SPACY:
+                return "Spacy";
+            case GUITAR:
+                return "Guitar";
+            case FLUTE:
+                return "Flute";
+            default:
+                return null;
+        }
     }
 }

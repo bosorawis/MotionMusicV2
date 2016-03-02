@@ -20,8 +20,21 @@ import java.util.Objects;
 public class EffectDialogFragment extends DialogFragment implements AdapterView.OnItemClickListener{
     ListView EffectListView;
     Context context;
+    private static final int NONE       = 0;
+    private static final int VOLUME     = 1;
+    private static final int FREQUENCY  = 2;
+    private static final int REVERB     = 3;
+    private static final int DELAY      = 4;
+    private static final int FLANGER    = 5;
+    private static final int DISTORTION = 6;
+    private static final int ROTARY     = 7;
+
+    private static final int SPACY      = 1000;
+    private static final int GUITAR     = 1001;
+    private static final int FLUTE      = 1002;
 
     protected static String[] EffectList = {
+            "None",
             "Volume",
             "Frequency",
             "Reverb",
@@ -31,6 +44,7 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
             "Rotary"
     };
     protected static String[] EffectDescription = {
+            "Nothing is selected:",
             "Change volume",       //Volume
             "Change frequency",    //Frequency
             "Add reverb",       //Reverb
@@ -40,6 +54,7 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
             "Rotary Effect"        //Rotary
     };
     protected static String[] WhoSelectEffect = {
+            null,       //None
             null,       //Volume
             null,       //Frequency
             null,       //Reverb
@@ -50,6 +65,7 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
     };
 
     protected static int[] EffectImages = {
+            R.mipmap.ic_launcher, //None
             R.mipmap.ic_launcher, //Volume
             R.mipmap.ic_launcher, //Frequency
             R.mipmap.ic_launcher, //Reverb
@@ -60,7 +76,7 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
     };
 
 
-    protected String[] SelectedEffects = new String[5];
+    protected int[] SelectedEffects = new int[5];
     protected String caller;
 
 
@@ -76,11 +92,11 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
         //Log.d("DialogFragment",getArguments().getString("Name"));
         //getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         caller = this.getArguments().getString("caller");
-        SelectedEffects[0] = this.getArguments().getString("R_fw_selected");
-        SelectedEffects[1] = this.getArguments().getString("R_ud_selected");
-        SelectedEffects[2] = this.getArguments().getString("R_lr_selected");
-        SelectedEffects[3] = this.getArguments().getString("R_pitch_selected");
-        SelectedEffects[4] = this.getArguments().getString("R_roll_selected");
+        SelectedEffects[0] = this.getArguments().getInt("R_fw_selected");
+        SelectedEffects[1] = this.getArguments().getInt("R_ud_selected");
+        SelectedEffects[2] = this.getArguments().getInt("R_lr_selected");
+        SelectedEffects[3] = this.getArguments().getInt("R_pitch_selected");
+        SelectedEffects[4] = this.getArguments().getInt("R_roll_selected");
 
 
         for(int i = 0 ; i < EffectList.length ; i++){
@@ -88,7 +104,7 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
         }
         for(int i = 0 ; i < SelectedEffects.length ; i++){
             for (int j = 0 ; j < EffectList.length ; j++){
-                if(Objects.equals(EffectList[j], SelectedEffects[i])){
+                if(Objects.equals(EffectList[j], getDefinedString(SelectedEffects[i]))){
                     switch (i){
                         case 0:
                             WhoSelectEffect[j] = "R_fw_selected";
@@ -140,7 +156,7 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
         //parent.getChildAt(position).setBackgroundColor(getResources().getColor(R.color.pressed_color));
         Toast.makeText(getActivity(), EffectList[position], Toast.LENGTH_SHORT)
                 .show();
-        ((MainActivity)getActivity()).dialogFragmentItemSelected(caller, EffectList[position]);
+        ((MainActivity)getActivity()).dialogFragmentItemSelected(caller, position);
     }
 
     @Override
@@ -158,5 +174,34 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
         EffectListView.setAdapter(adapter);
         EffectListView.setOnItemClickListener(this);
 
+    }
+
+    public String getDefinedString(int data){
+        switch (data){
+            case NONE:
+                return "None";
+            case VOLUME:
+                return "Volume";
+            case FREQUENCY:
+                return "Frequency";
+            case REVERB:
+                return "Reverb";
+            case DELAY:
+                return "Delay";
+            case FLANGER:
+                return "Flanger";
+            case DISTORTION:
+                return "Distortion";
+            case ROTARY:
+                return "Rotary";
+            case SPACY:
+                return "Spacy";
+            case GUITAR:
+                return "Guitar";
+            case FLUTE:
+                return "Flute";
+            default:
+                return null;
+        }
     }
 }
