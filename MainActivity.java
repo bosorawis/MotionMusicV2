@@ -75,12 +75,15 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     private static final int GUITAR     = 1001;
     private static final int FLUTE      = 1002;
 
+    private static final int ACCELEROMETER_DIVIDER     = 100;
+    private static final int GYROSCOPE_DIVIDER         = 90;
 
-    private static final int PITCH_DATA   = 0;
-    private static final int ROLL_DATA    = 1;
-    private static final int X_ACCEL_DATA = 2;
-    private static final int Y_ACCEL_DATA = 3;
-    private static final int Z_ACCEL_DATA = 4;
+
+    private static final int PITCH   = 0;
+    private static final int ROLL    = 1;
+    private static final int X_ACCEL = 2;
+    private static final int Y_ACCEL = 3;
+    private static final int Z_ACCEL = 4;
 
     private  float volume = (float) 0.0;
     private  float freq = (float) 0.0;
@@ -196,8 +199,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
                 if(data.length>=2) {
 
-                    pitchData = data[PITCH_DATA];
-                    rollData = data[ROLL_DATA];
+                    pitchData = data[PITCH];
+                    rollData = data[ROLL];
 
                     Log.d("OnReceive","r_pitchData: " + Integer.toString(pitchData) );
                     Log.d("OnReceive","r_rollData: "  + Integer.toString(rollData));
@@ -422,14 +425,24 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         int currentOption[] = rightHand.getAllEffect();
         float finalData = 0;
         int readData;
+
         for(int i = 0 ; i < currentOption.length ; i++){
-            Log.d("dataProc", Integer.toString(currentOption[i]));
+            //Log.d("dataProc", getDefinedString(currentOption[i]));
+            //if(data.length <2){
+            //    return;
+            //}
+            finalData = 0;
+
             readData = data[i];
+            Log.d("DataReceived","Num: "+ Integer.toString(i) + " \tdata: " + Integer.toString(readData));
             if(i <= 1){
-                finalData = (float)readData/90;
+                finalData = (float)(readData+GYROSCOPE_DIVIDER)/(2*GYROSCOPE_DIVIDER);
+                Log.d("dataProc", "In if:" + Float.toString(finalData));
+
             }
             else{
-                finalData = (float)readData/100;
+                finalData = (float)(readData+GYROSCOPE_DIVIDER)/(2*GYROSCOPE_DIVIDER);
+
             }
             switch(currentOption[i]){
                 case NONE:
@@ -456,7 +469,6 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                     Log.d("MainActivity", "WTF!!!");
                     break;
             }
-            finalData = 0;
 
         }
     }
@@ -493,6 +505,16 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         Log.d("dfItemSelected", param+":" + selectedItem);
         TextView txt;
         switch(param){
+            case "R_pitch":
+                txt = (TextView) findViewById(R.id.pitchText);
+                txt.setText(getDefinedString(selectedItem));
+                rightHand.setEffects(PITCH, selectedItem);
+                break;
+            case "R_roll":
+                txt = (TextView) findViewById(R.id.rollText);
+                txt.setText(getDefinedString(selectedItem));
+                rightHand.setEffects(ROLL, selectedItem);
+                break;
             case "R_inst":
                 txt = (TextView) findViewById(R.id.instText);
                 txt.setText(getDefinedString(selectedItem));
@@ -501,25 +523,15 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             case "R_fb":
                 txt = (TextView) findViewById(R.id.fwBackText);
                 txt.setText(getDefinedString(selectedItem));
-                rightHand.setEffects(0, selectedItem);
+                rightHand.setEffects(2, selectedItem);
                 break;
             case "R_ud":
                 txt = (TextView) findViewById(R.id.upDownText);
                 txt.setText(getDefinedString(selectedItem));
-                rightHand.setEffects(1, selectedItem);
+                rightHand.setEffects(3, selectedItem);
                 break;
             case "R_lr":
                 txt = (TextView) findViewById(R.id.leftRightText);
-                txt.setText(getDefinedString(selectedItem));
-                rightHand.setEffects(2, selectedItem);
-                break;
-            case "R_pitch":
-                txt = (TextView) findViewById(R.id.pitchText);
-                txt.setText(getDefinedString(selectedItem));
-                rightHand.setEffects(3, selectedItem);
-                break;
-            case "R_roll":
-                txt = (TextView) findViewById(R.id.rollText);
                 txt.setText(getDefinedString(selectedItem));
                 rightHand.setEffects(4, selectedItem);
                 break;

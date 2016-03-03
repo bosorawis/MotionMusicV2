@@ -126,11 +126,11 @@ public class RightHandFragment extends Fragment  {
         TextView roll_txt       = (TextView) view.findViewById(R.id.rollText);
 
         instr_txt.setText(getDefinedString(MainActivity.rightHand.getInstrument()));
-        fwBack_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(0)));
-        upDown_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(1)));
-        leftRight_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(2)));
-        pitch_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(3)));
-        roll_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(4)));
+        pitch_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(0)));
+        roll_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(1)));
+        fwBack_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(2)));
+        upDown_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(3)));
+        leftRight_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(4)));
 
         //fw_back_btn.setOnClickListener(this);
 
@@ -242,11 +242,11 @@ public class RightHandFragment extends Fragment  {
 
         bundle.putString("caller",caller);
 
-        bundle.putInt("R_fw_selected", MainActivity.rightHand.getEffect(0));
-        bundle.putInt("R_ud_selected", MainActivity.rightHand.getEffect(1));
-        bundle.putInt("R_lr_selected", MainActivity.rightHand.getEffect(2));
-        bundle.putInt("R_pitch_selected", MainActivity.rightHand.getEffect(3));
-        bundle.putInt("R_roll_selected",MainActivity.rightHand.getEffect(4));
+        bundle.putInt("R_pitch_selected", MainActivity.rightHand.getEffect(0));
+        bundle.putInt("R_roll_selected", MainActivity.rightHand.getEffect(1));
+        bundle.putInt("R_fw_selected", MainActivity.rightHand.getEffect(2));
+        bundle.putInt("R_ud_selected", MainActivity.rightHand.getEffect(3));
+        bundle.putInt("R_lr_selected", MainActivity.rightHand.getEffect(4));
 
         return bundle;
     }
@@ -286,11 +286,12 @@ public class RightHandFragment extends Fragment  {
     }
     public void setAllText(){
         instr_txt.setText(getDefinedString(MainActivity.rightHand.getInstrument()));
-        fwBack_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(0)));
-        upDown_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(1)));
-        leftRight_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(2)));
-        pitch_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(3)));
-        roll_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(4)));
+
+        pitch_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(0)));
+        roll_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(1)));
+        fwBack_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(2)));
+        upDown_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(3)));
+        leftRight_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(4)));
     }
 
 
