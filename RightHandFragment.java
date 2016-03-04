@@ -32,6 +32,7 @@ public class RightHandFragment extends Fragment  {
     private static final int FLANGER    = 5;
     private static final int DISTORTION = 6;
     private static final int ROTARY     = 7;
+    private static final int VIBRATO    = 8;
 
     private static final int SPACY      = 1000;
     private static final int GUITAR     = 1001;
@@ -319,6 +320,8 @@ public class RightHandFragment extends Fragment  {
                 return "Guitar";
             case FLUTE:
                 return "Flute";
+            case VIBRATO:
+                return "Vibrato";
             default:
                 return null;
         }

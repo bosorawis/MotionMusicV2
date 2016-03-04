@@ -70,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     private static final int FLANGER    = 5;
     private static final int DISTORTION = 6;
     private static final int ROTARY     = 7;
+    private static final int VIBRATO     = 8;
+
 
     private static final int SPACY      = 1000;
     private static final int GUITAR     = 1001;
@@ -89,13 +91,10 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     private float freq    = (float) 0.0;
     private float flanger = (float) 0.0;
     private float reverb  = (float) 0.72;
+    private float vibrato = (float) 0.0;
+
     int rightHandCurrent[] = rightHand.getAllEffect();
 
-    int pitchData;
-    int rollData;
-    int x_accelData;
-    int y_accelData;
-    int z_accelData;
 
     static List<String> selectedItem = new ArrayList<String>();
     /************************
@@ -104,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     CsoundObj csoundObj = new CsoundObj();
     //Structure:
     //l_inst, l_fw, l_ud, l_lr, l_tl, l_tn, r_inst, r_fw, r_ud, r_lr, r_
-    CsoundMYFLTArray testArr[] = new CsoundMYFLTArray[4];
+    CsoundMYFLTArray testArr[] = new CsoundMYFLTArray[5];
 
     //protected Handler handler = new Handler();
     ToggleButton startStop;
@@ -376,7 +375,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         testArr[1] = csoundObj.getInputChannelPtr(String.format("volume_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
         testArr[2] = csoundObj.getInputChannelPtr(String.format("flanger_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
         testArr[3] = csoundObj.getInputChannelPtr(String.format("reverb_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
-
+        testArr[4] = csoundObj.getInputChannelPtr(String.format("vibrato_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
     }
 
     @Override
@@ -395,6 +394,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         testArr[1].SetValue(0, volume);
         testArr[2].SetValue(0, flanger);
         testArr[3].SetValue(0, reverb);
+        testArr[4].SetValue(0, vibrato);
     }
     //TODO
     //Fix the processing correctly
@@ -428,8 +428,9 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                     volume = finalData;
                     break;
                 case FREQUENCY:
+                    //Log.d("dataFreq", "data: " + Integer.toHexString(readData));
                     //Log.d("dataProc","freq:" + Float.toString(finalData));
-                    freq  = finalData/8;
+                    freq  = finalData/2;
                     break;
                 case REVERB:
                     reverb = finalData;
@@ -443,6 +444,11 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                     break;
                 case ROTARY:
                     break;
+                case VIBRATO:
+                    Log.d("dataProc","vibrato:" + Float.toString(finalData));
+                    vibrato = finalData * 2;
+                    break;
+
                 default:
                     Log.d("MainActivity", "WTF!!!");
                     break;
@@ -520,7 +526,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     public void reInitiate(){
         reverb = 0;
         volume = (float) 0.5;
-        //freq   = (float) 0.5;
+        //freq   = (float) 0.5;8
+        vibrato = 0;
         flanger = 0;
     }
      /*********************************************************************
@@ -550,6 +557,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 return "Guitar";
             case FLUTE:
                 return "Flute";
+            case VIBRATO:
+                return "Vibrato";
             default:
                 return null;
         }

@@ -28,6 +28,7 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
     private static final int FLANGER    = 5;
     private static final int DISTORTION = 6;
     private static final int ROTARY     = 7;
+    private static final int VIBRATO    = 8;
 
     private static final int SPACY      = 1000;
     private static final int GUITAR     = 1001;
@@ -41,7 +42,8 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
             "Delay",
             "Flanger",
             "Distortion",
-            "Rotary"
+            "Rotary",
+            "Vibrato"
     };
     protected static String[] EffectDescription = {
             "Nothing is selected:",
@@ -51,7 +53,8 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
             "Add echo",        //Delay
             "Add spacy sound",      //Flanger
             "Distort the sound",   //Distortion
-            "Rotary Effect"        //Rotary
+            "Rotary Effect",        //Rotary
+            "Vibrato shows "
     };
     protected static String[] WhoSelectEffect = {
             null,       //None
@@ -61,7 +64,8 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
             null,       //Delay
             null,       //Flanger
             null,       //Distortion
-            null        //Rotary
+            null,       //Rotary
+            null        //Vibrato
     };
 
     protected static int[] EffectImages = {
@@ -72,7 +76,9 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
             R.mipmap.ic_launcher, //Delay
             R.mipmap.ic_launcher, //Flanger
             R.mipmap.ic_launcher, //Distortion
-            R.mipmap.ic_launcher  //Rotary
+            R.mipmap.ic_launcher, //Rotary
+            R.mipmap.ic_launcher  //Vibration
+
     };
 
 
@@ -200,6 +206,8 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
                 return "Guitar";
             case FLUTE:
                 return "Flute";
+            case VIBRATO:
+                return "Vibrato";
             default:
                 return null;
         }
