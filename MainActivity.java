@@ -85,9 +85,10 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     private static final int Y_ACCEL = 3;
     private static final int Z_ACCEL = 4;
 
-    private  float volume = (float) 0.0;
-    private  float freq = (float) 0.0;
-
+    private float volume  = (float) 0.5;
+    private float freq    = (float) 0.0;
+    private float flanger = (float) 0.0;
+    private float reverb  = (float) 0.72;
     int rightHandCurrent[] = rightHand.getAllEffect();
 
     int pitchData;
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     CsoundObj csoundObj = new CsoundObj();
     //Structure:
     //l_inst, l_fw, l_ud, l_lr, l_tl, l_tn, r_inst, r_fw, r_ud, r_lr, r_
-    CsoundMYFLTArray testArr[] = new CsoundMYFLTArray[2];
+    CsoundMYFLTArray testArr[] = new CsoundMYFLTArray[4];
 
     //protected Handler handler = new Handler();
     ToggleButton startStop;
@@ -114,11 +115,11 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         rightHand.setInstrument(SPACY);
-        rightHand.setEffects(0, DELAY);
-        rightHand.setEffects(1, REVERB);
-        rightHand.setEffects(2, FLANGER);
-        rightHand.setEffects(3, FREQUENCY);
-        rightHand.setEffects(4, VOLUME);
+        rightHand.setEffects(PITCH, FLANGER);
+        rightHand.setEffects(ROLL, NONE);
+        rightHand.setEffects(X_ACCEL, NONE);
+        rightHand.setEffects(Y_ACCEL, NONE);
+        rightHand.setEffects(Z_ACCEL, NONE);
 
         //selectedRightHandEffect = rightHand.getAllEffect();
 
@@ -195,29 +196,11 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 // data[2] - 100    x_speed
                 // data[3] - 100    y_speed
                 // data[4] - 100    z_speed
-
-
                 if(data.length>=2) {
-
-                    pitchData = data[PITCH];
-                    rollData = data[ROLL];
-
-                    Log.d("OnReceive","r_pitchData: " + Integer.toString(pitchData) );
-                    Log.d("OnReceive","r_rollData: "  + Integer.toString(rollData));
+                    //Log.d("OnReceive","r_pitchData: " + Integer.toString(pitchData) );
+                    //Log.d("OnReceive","r_rollData: "  + Integer.toString(rollData));
                     dataProc(data);
-                    //r_x_accelData =  data[2];
-                    //r_y_accelData =  data[3];
-                    //r_z_accelData =  data[4];
-                    //for (int i = 0; i < rightHandCurrent.length; i++) {
-                    //    dataProc(data[i],i);
-                    //}
                 }
-                //csdTest += Float.parseFloat(message);
-                //Log.d("MainActivity", "val: " + csdTest);
-                //for(int i = 0 ; i < testArr.length ; i++) {
-                //    if (testArr[i] != null) {
-                        //Log.d("Hello","Fuck you");
-                //testArr[0].SetValue(0, csdTest);
             }
         });
         //**********END BLUETOOTH*******************************//
@@ -251,10 +234,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         String csd = getResourceFileAsString(R.raw.test);
         File f = createTempFile(csd);
         csoundObj.addBinding(this);
-        //Log.d("MainActivity", "this is " + String.valueOf(this));
         csoundObj.startCsound(f);
         //END CSD
-        //Add Bluetooth connect button somewhere
     }
 
     @Override
@@ -393,20 +374,14 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
         testArr[0] = csoundObj.getInputChannelPtr(String.format("frequency_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
         testArr[1] = csoundObj.getInputChannelPtr(String.format("volume_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
+        testArr[2] = csoundObj.getInputChannelPtr(String.format("flanger_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
+        testArr[3] = csoundObj.getInputChannelPtr(String.format("reverb_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
 
     }
 
     @Override
     public void updateValuesToCsound() {
         //Log.d("Well","What the actual fuck");
-        //for (int i = 0; i < testArr.length; i++) {
-        //    float send = csdTest/100;
-        //    //if(send>=1){
-        //     //   send = 1;
-        //    //}
-        //    testArr[i].SetValue(0, send);
-        //    //freqArr[0].SetValue(0, send);
-        //}
 
 
         //Write test value for all effects
@@ -418,6 +393,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
         testArr[0].SetValue(0, freq);
         testArr[1].SetValue(0, volume);
+        testArr[2].SetValue(0, flanger);
+        testArr[3].SetValue(0, reverb);
     }
     //TODO
     //Fix the processing correctly
@@ -427,39 +404,40 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         int readData;
 
         for(int i = 0 ; i < currentOption.length ; i++){
-            //Log.d("dataProc", getDefinedString(currentOption[i]));
-            //if(data.length <2){
-            //    return;
-            //}
             finalData = 0;
-
+            if (i >= data.length){
+                return;
+            }
             readData = data[i];
-            Log.d("DataReceived","Num: "+ Integer.toString(i) + " \tdata: " + Integer.toString(readData));
+            //Log.d("DataReceived","Num: "+ Integer.toString(i) + " \tdata: " + Integer.toString(readData));
             if(i <= 1){
                 finalData = (float)(readData+GYROSCOPE_DIVIDER)/(2*GYROSCOPE_DIVIDER);
-                Log.d("dataProc", "In if:" + Float.toString(finalData));
+                //Log.d("dataProc", "In if:" + Float.toString(finalData));
 
             }
             else{
                 finalData = (float)(readData+GYROSCOPE_DIVIDER)/(2*GYROSCOPE_DIVIDER);
 
             }
+            reInitiate();
             switch(currentOption[i]){
                 case NONE:
                     break;
                 case VOLUME:
-                    Log.d("dataProc","volume:" + Float.toString(finalData));
+                    //Log.d("dataProc","volume:" + Float.toString(finalData));
                     volume = finalData;
                     break;
                 case FREQUENCY:
-                    Log.d("dataProc","freq:" + Float.toString(finalData));
-                    freq  = finalData;
+                    //Log.d("dataProc","freq:" + Float.toString(finalData));
+                    freq  = finalData/8;
                     break;
                 case REVERB:
+                    reverb = finalData;
                     break;
                 case DELAY:
                     break;
                 case FLANGER:
+                    flanger = finalData;
                     break;
                 case DISTORTION:
                     break;
@@ -538,6 +516,12 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             default:
                 break;
         }
+    }
+    public void reInitiate(){
+        reverb = 0;
+        volume = (float) 0.5;
+        //freq   = (float) 0.5;
+        flanger = 0;
     }
      /*********************************************************************
                     End of MyDialogFragment
