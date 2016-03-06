@@ -76,6 +76,22 @@ public class CustomAdapter extends BaseAdapter {
                 case    "R_roll_selected":
                     convertView.setBackgroundColor(Color.parseColor("#CED490"));
                     break;
+
+                case    "L_fw_selected":
+                    convertView.setBackgroundColor(Color.parseColor("#A1D490"));
+                    break;
+                case    "L_ud_selected":
+                    convertView.setBackgroundColor(Color.parseColor("#D4A490"));
+                    break;
+                case    "L_lr_selected":
+                    convertView.setBackgroundColor(Color.parseColor("#90C0D4"));
+                    break;
+                case    "L_pitch_selected":
+                    convertView.setBackgroundColor(Color.parseColor("#CC90D4"));
+                    break;
+                case    "L_roll_selected":
+                    convertView.setBackgroundColor(Color.parseColor("#CED490"));
+                    break;
                 default:
                     break;
             }

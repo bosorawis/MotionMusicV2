@@ -98,7 +98,6 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
         //Log.d("DialogFragment",getArguments().getString("Name"));
         //getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         caller = this.getArguments().getString("caller");
-
         SelectedEffects[0] = this.getArguments().getInt("R_fw_selected");
         SelectedEffects[1] = this.getArguments().getInt("R_ud_selected");
         SelectedEffects[2] = this.getArguments().getInt("R_lr_selected");
