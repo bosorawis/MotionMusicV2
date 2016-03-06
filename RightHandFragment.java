@@ -42,8 +42,6 @@ public class RightHandFragment extends Fragment  {
     private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     private FragmentActivity myContext;
 
     private OnFragmentInteractionListener mListener;
@@ -53,11 +51,11 @@ public class RightHandFragment extends Fragment  {
      */
 
     TextView instr_txt;
-    TextView fwBack_txt;
-    TextView leftRight_txt;
-    TextView upDown_txt;
-    TextView pitch_txt;
-    TextView roll_txt;
+    TextView r_fwBack_txt;
+    TextView r_leftRight_txt;
+    TextView r_upDown_txt;
+    TextView r_pitch_txt;
+    TextView r_roll_txt;
 
     //All the buttons
     /*
@@ -95,8 +93,6 @@ public class RightHandFragment extends Fragment  {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -120,11 +116,11 @@ public class RightHandFragment extends Fragment  {
          * Text Views
          */
         TextView instr_txt      = (TextView) view.findViewById(R.id.instText);
-        TextView fwBack_txt     = (TextView) view.findViewById(R.id.fwBackText);
-        TextView leftRight_txt  = (TextView) view.findViewById(R.id.leftRightText);
-        TextView upDown_txt     = (TextView) view.findViewById(R.id.upDownText);
-        TextView pitch_txt      = (TextView) view.findViewById(R.id.pitchText);
-        TextView roll_txt       = (TextView) view.findViewById(R.id.rollText);
+        TextView fwBack_txt     = (TextView) view.findViewById(R.id.r_fwBackText);
+        TextView leftRight_txt  = (TextView) view.findViewById(R.id.r_leftRightText);
+        TextView upDown_txt     = (TextView) view.findViewById(R.id.r_upDownText);
+        TextView pitch_txt      = (TextView) view.findViewById(R.id.r_pitchText);
+        TextView roll_txt       = (TextView) view.findViewById(R.id.r_rollText);
 
         instr_txt.setText(getDefinedString(MainActivity.rightHand.getInstrument()));
         pitch_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(0)));
@@ -288,11 +284,12 @@ public class RightHandFragment extends Fragment  {
     public void setAllText(){
         instr_txt.setText(getDefinedString(MainActivity.rightHand.getInstrument()));
 
-        pitch_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(0)));
-        roll_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(1)));
-        fwBack_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(2)));
-        upDown_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(3)));
-        leftRight_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(4)));
+
+        r_pitch_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(0)));
+        r_roll_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(1)));
+        r_fwBack_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(2)));
+        r_upDown_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(3)));
+        r_leftRight_txt.setText(getDefinedString(MainActivity.rightHand.getEffect(4)));
     }
 
 

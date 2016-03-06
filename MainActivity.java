@@ -58,6 +58,7 @@ import csnd6.controlChannelType;
  */
 public class MainActivity extends AppCompatActivity implements LeftHandFragment.OnFragmentInteractionListener, RightHandFragment.OnFragmentInteractionListener, CsoundObjListener,CsoundBinding {
     public static Hands rightHand = new Hands();
+    public static Hands leftHand  = new Hands();
     /**
      * Variable for Csound
      */
@@ -94,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     private float vibrato = (float) 0.0;
 
     int rightHandCurrent[] = rightHand.getAllEffect();
+    int leftHandCurrent[] = leftHand.getAllEffect();
 
 
     static List<String> selectedItem = new ArrayList<String>();
@@ -120,6 +122,11 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         rightHand.setEffects(Y_ACCEL, NONE);
         rightHand.setEffects(Z_ACCEL, NONE);
 
+        leftHand.setEffects(PITCH, NONE);
+        leftHand.setEffects(ROLL, NONE);
+        leftHand.setEffects(X_ACCEL, NONE);
+        leftHand.setEffects(Y_ACCEL, NONE);
+        leftHand.setEffects(Z_ACCEL, NONE);
         //selectedRightHandEffect = rightHand.getAllEffect();
 
         super.onCreate(savedInstanceState);
@@ -490,12 +497,12 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         TextView txt;
         switch(param){
             case "R_pitch":
-                txt = (TextView) findViewById(R.id.pitchText);
+                txt = (TextView) findViewById(R.id.r_pitchText);
                 txt.setText(getDefinedString(selectedItem));
                 rightHand.setEffects(PITCH, selectedItem);
                 break;
             case "R_roll":
-                txt = (TextView) findViewById(R.id.rollText);
+                txt = (TextView) findViewById(R.id.r_rollText);
                 txt.setText(getDefinedString(selectedItem));
                 rightHand.setEffects(ROLL, selectedItem);
                 break;
@@ -505,20 +512,47 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 rightHand.setInstrument(selectedItem);
                 break;
             case "R_fb":
-                txt = (TextView) findViewById(R.id.fwBackText);
+                txt = (TextView) findViewById(R.id.r_fwBackText);
                 txt.setText(getDefinedString(selectedItem));
                 rightHand.setEffects(2, selectedItem);
                 break;
             case "R_ud":
-                txt = (TextView) findViewById(R.id.upDownText);
+                txt = (TextView) findViewById(R.id.r_upDownText);
                 txt.setText(getDefinedString(selectedItem));
                 rightHand.setEffects(3, selectedItem);
                 break;
             case "R_lr":
-                txt = (TextView) findViewById(R.id.leftRightText);
+                txt = (TextView) findViewById(R.id.r_leftRightText);
                 txt.setText(getDefinedString(selectedItem));
                 rightHand.setEffects(4, selectedItem);
                 break;
+
+            case "L_pitch":
+                txt = (TextView) findViewById(R.id.l_pitchText);
+                txt.setText(getDefinedString(selectedItem));
+                leftHand.setEffects(PITCH, selectedItem);
+                break;
+            case "L_roll":
+                txt = (TextView) findViewById(R.id.l_rollText);
+                txt.setText(getDefinedString(selectedItem));
+                leftHand.setEffects(ROLL, selectedItem);
+                break;
+            case "L_fb":
+                txt = (TextView) findViewById(R.id.l_fwBackText);
+                txt.setText(getDefinedString(selectedItem));
+                leftHand.setEffects(2, selectedItem);
+                break;
+            case "L_ud":
+                txt = (TextView) findViewById(R.id.l_upDownText);
+                txt.setText(getDefinedString(selectedItem));
+                leftHand.setEffects(3, selectedItem);
+                break;
+            case "L_lr":
+                txt = (TextView) findViewById(R.id.l_leftRightText);
+                txt.setText(getDefinedString(selectedItem));
+                leftHand.setEffects(4, selectedItem);
+                break;
+
             default:
                 break;
         }
