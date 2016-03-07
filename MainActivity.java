@@ -138,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         //Default value hard coded for testing
 
         final Button testButton = (Button) findViewById(R.id.testButton);
-        final Button checkButton = (Button) findViewById(R.id.checkVal);
         startStop = (ToggleButton) findViewById(R.id.onOffButton);
         /*
         Here for testing csound
@@ -220,19 +219,6 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 Log.d("testButtonClick", "Byte:" + Integer.toString(testValue - 128));
             }
         });
-        checkButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (bt.getServiceState() == BluetoothState.STATE_CONNECTED) {
-                    bt.disconnect();
-                } else {
-                    Intent intent = new Intent(getApplicationContext(), DeviceList.class);
-                    startActivityForResult(intent, BluetoothState.REQUEST_CONNECT_DEVICE);
-                }
-
-            }
-        });
 
         /**
          * CSD initialization
@@ -302,6 +288,13 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         }
         else if (id == R.id.action_bluetooth){
             Log.d("MainActivity", "Bluetooth Select");
+            if (bt.getServiceState() == BluetoothState.STATE_CONNECTED) {
+                bt.disconnect();
+            } else {
+                Intent intent = new Intent(getApplicationContext(), DeviceList.class);
+                startActivityForResult(intent, BluetoothState.REQUEST_CONNECT_DEVICE);
+            }
+
             return true;
         }
 
@@ -449,8 +442,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                     volume = finalData;
                     break;
                 case FREQUENCY:
-                    //Log.d("dataFreq", "data: " + Integer.toHexString(readData));
-                    //Log.d("dataProc","freq:" + Float.toString(finalData));
+                    Log.d("dataFreq", "data: " + Integer.toHexString(readData));
+                    Log.d("dataProc","freq:" + Float.toString(finalData));
                     freq  += finalData/2;
                     break;
                 case REVERB:
