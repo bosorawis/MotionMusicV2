@@ -92,6 +92,10 @@ public class CustomAdapter extends BaseAdapter {
                 case    "L_roll_selected":
                     convertView.setBackgroundColor(Color.parseColor("#CED490"));
                     break;
+                case    "instrument_selected":
+                    convertView.setBackgroundColor(Color.parseColor("#767873"));
+                    break;
+
                 default:
                     break;
             }

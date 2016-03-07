@@ -104,6 +104,7 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
         SelectedEffects[3] = this.getArguments().getInt("R_pitch_selected");
         SelectedEffects[4] = this.getArguments().getInt("R_roll_selected");
 
+
         for(int i = 0 ; i < EffectList.length ; i++){
             WhoSelectEffect[i] = null;
         }

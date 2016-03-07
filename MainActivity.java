@@ -78,8 +78,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     private static final int GUITAR     = 1001;
     private static final int FLUTE      = 1002;
 
-    private static final int ACCELEROMETER_DIVIDER     = 100;
-    private static final int GYROSCOPE_DIVIDER         = 90;
+    private static final int MAX_ACCELEROMETER    = 200;
+    private static final int MAX_GYROSCOPE        = 180;
 
 
     private static final int PITCH   = 0;
@@ -406,28 +406,42 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     //TODO
     //Fix the processing correctly
     private void dataProc(byte[] data){
-        int currentOption[] = rightHand.getAllEffect();
+
+        //data[] is 10 bytes long
+        // data[0] - 90     right hand pitch
+        // data[1] - 90     right hand roll
+        // data[2] - 100    right hand x_speed
+        // data[3] - 100    right hand y_speed
+        // data[4] - 100    right hand z_speed
+
+        // data[5] - 90     left hand pitch
+        // data[6] - 90     left hand roll
+        // data[7] - 100    left hand x_speed
+        // data[8] - 100    left hand y_speed
+        // data[9] - 100    left hand z_speed
+
+        int rightHandEffects[] = rightHand.getAllEffect();
+        int LeftHandEffects[] = leftHand.getAllEffect();
+
         float finalData = 0;
         int readData;
-
-        for(int i = 0 ; i < currentOption.length ; i++){
+        reInitiate();
+        for (int i = 0 ; i < rightHandEffects.length ; i++){
             finalData = 0;
             if (i >= data.length){
                 return;
             }
             readData = data[i];
-            //Log.d("DataReceived","Num: "+ Integer.toString(i) + " \tdata: " + Integer.toString(readData));
-            if(i <= 1){
-                finalData = (float)(readData+GYROSCOPE_DIVIDER)/(2*GYROSCOPE_DIVIDER);
-                //Log.d("dataProc", "In if:" + Float.toString(finalData));
 
+            if(i <= 1){
+                finalData = (float)(readData)/(MAX_GYROSCOPE);
+                //Log.d("dataProc", "In if:" + Float.toString(finalData));
             }
             else{
-                finalData = (float)(readData+GYROSCOPE_DIVIDER)/(2*GYROSCOPE_DIVIDER);
-
+                finalData = (float)(readData)/(MAX_ACCELEROMETER);
             }
-            reInitiate();
-            switch(currentOption[i]){
+
+            switch(rightHandEffects[i]){
                 case NONE:
                     break;
                 case VOLUME:
@@ -437,15 +451,15 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 case FREQUENCY:
                     //Log.d("dataFreq", "data: " + Integer.toHexString(readData));
                     //Log.d("dataProc","freq:" + Float.toString(finalData));
-                    freq  = finalData/2;
+                    freq  += finalData/2;
                     break;
                 case REVERB:
-                    reverb = finalData;
+                    reverb += finalData;
                     break;
                 case DELAY:
                     break;
                 case FLANGER:
-                    flanger = finalData;
+                    flanger += finalData;
                     break;
                 case DISTORTION:
                     break;
@@ -453,15 +467,64 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                     break;
                 case VIBRATO:
                     Log.d("dataProc","vibrato:" + Float.toString(finalData));
-                    vibrato = finalData * 2;
+                    vibrato += finalData * 2;
+                    break;
+                default:
+                    Log.d("MainActivity", "WTF!!!");
+                    break;
+            }
+        }
+        //LeftHand Handler
+        for(int i = 0 ; i < LeftHandEffects.length ; i++){
+            finalData = 0;
+            if (i+5 >= data.length){
+                return;
+            }
+            readData = data[i+5];
+            //Log.d("DataReceived","Num: "+ Integer.toString(i) + " \tdata: " + Integer.toString(readData));
+            if(i <= 1){
+                finalData = (float)(readData)/(MAX_GYROSCOPE);
+                //Log.d("dataProc", "In if:" + Float.toString(finalData));
+            }
+            else{
+                finalData = (float)(readData)/(MAX_ACCELEROMETER);
+            }
+            switch(LeftHandEffects[i]){
+                case NONE:
+                    break;
+                case VOLUME:
+                    //Log.d("dataProc","volume:" + Float.toString(finalData));
+                    volume += finalData;
+                    break;
+                case FREQUENCY:
+                    //Log.d("dataFreq", "data: " + Integer.toHexString(readData));
+                    //Log.d("dataProc","freq:" + Float.toString(finalData));
+                    freq  += finalData/2;
+                    break;
+                case REVERB:
+                    reverb += finalData;
+                    break;
+                case DELAY:
+                    break;
+                case FLANGER:
+                    flanger += finalData;
+                    break;
+                case DISTORTION:
+                    break;
+                case ROTARY:
+                    break;
+                case VIBRATO:
+                    Log.d("dataProc","vibrato:" + Float.toString(finalData));
+                    vibrato += finalData * 2;
                     break;
 
                 default:
                     Log.d("MainActivity", "WTF!!!");
                     break;
             }
-
         }
+
+
     }
 
     @Override
@@ -560,7 +623,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     public void reInitiate(){
         reverb = 0;
         volume = (float) 0.5;
-        //freq   = (float) 0.5;8
+        freq   = (float) 0.5;
         vibrato = 0;
         flanger = 0;
     }

@@ -142,8 +142,6 @@ public class RightHandFragment extends Fragment  {
                 //Log.d("RightHandFragment", "fw_back_btn");
                 //Bundle to pass arguments to the dialogFragment
                 Bundle bundle = setBundle("R_fb");
-                //String caller = "R_fb";
-                //bundle.putString("caller",caller);
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
                 //MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Forward - Backward");
                 EffectDialogFragment  fragment= new EffectDialogFragment();
@@ -157,8 +155,6 @@ public class RightHandFragment extends Fragment  {
             public void onClick(View v) {
                 //Log.d("RightHandFragment", "left_right_btn");
                 Bundle bundle = setBundle("R_lr");
-                //String caller = "R_lr";
-                //bundle.putString("caller",caller);
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
                 //MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Left - Right");
                 EffectDialogFragment  fragment= new EffectDialogFragment();
@@ -172,8 +168,6 @@ public class RightHandFragment extends Fragment  {
             public void onClick(View v) {
                 //Log.d("RightHandFragment", "up_down_btn");
                 Bundle bundle = setBundle("R_ud");
-                //String caller = "R_ud";
-                //bundle.putString("caller",caller);
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
                 //MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Up - Down");
                 EffectDialogFragment  fragment= new EffectDialogFragment();
@@ -187,8 +181,6 @@ public class RightHandFragment extends Fragment  {
             public void onClick(View v) {
                 //Log.d("RightHandFragment", "tilt_btn");
                 Bundle bundle = setBundle("R_pitch");
-                //String caller = "R_pitch";
-                //bundle.putString("caller",caller);
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
                 //MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Tilt");
                 EffectDialogFragment  fragment= new EffectDialogFragment();
@@ -202,8 +194,6 @@ public class RightHandFragment extends Fragment  {
             public void onClick(View v) {
                 //Log.d("RightHandFragment", "turn_btn");
                 Bundle bundle = setBundle("R_roll");
-                //String caller = "R_roll";
-                //bundle.putString("caller",caller);
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
                 //MainActivity.MyDialogFragment fragment = MainActivity.MyDialogFragment.newInstance("Pitch");
                 EffectDialogFragment  fragment= new EffectDialogFragment();
@@ -216,8 +206,6 @@ public class RightHandFragment extends Fragment  {
             public void onClick(View v) {
                 //Log.d("RightHandFragment", "instrument_btn");
                 Bundle bundle = new Bundle();
-                String caller = "R_inst";
-                bundle.putString("caller",caller);
                 bundle.putString("previous",getDefinedString(MainActivity.rightHand.getInstrument()));
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
                 InstrumentDialogFragment fragment = new InstrumentDialogFragment();
@@ -241,14 +229,14 @@ public class RightHandFragment extends Fragment  {
     public Bundle setBundle(String caller){
         Bundle bundle = new Bundle();
 
-        bundle.putString("caller",caller);
+        bundle.putString("caller", caller);
 
         bundle.putInt("R_pitch_selected", MainActivity.rightHand.getEffect(0));
         bundle.putInt("R_roll_selected", MainActivity.rightHand.getEffect(1));
         bundle.putInt("R_fw_selected", MainActivity.rightHand.getEffect(2));
         bundle.putInt("R_ud_selected", MainActivity.rightHand.getEffect(3));
         bundle.putInt("R_lr_selected", MainActivity.rightHand.getEffect(4));
-
+        bundle.putInt("instrument_selected", MainActivity.rightHand.getInstrument());
         return bundle;
     }
     @Override

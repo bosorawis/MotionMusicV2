@@ -35,6 +35,11 @@ public class InstrumentDialogFragment extends DialogFragment implements AdapterV
             R.mipmap.ic_launcher, //Guitar
             R.mipmap.ic_launcher, //Flute
     };
+    protected static String[] WhoSelectedInstrument = {
+            null, // Spacy
+            null, // Guitar
+            null  // Flute
+    };
     protected String[] DisplayInstrumentList = InstrumentList;
     protected String previous;
     protected String caller;
@@ -62,12 +67,6 @@ public class InstrumentDialogFragment extends DialogFragment implements AdapterV
         caller = this.getArguments().getString("caller");
         previous = this.getArguments().getString("previous");
 
-        for(int i = 0 ; i<DisplayInstrumentList.length ; i++){
-            if(DisplayInstrumentList[i] == previous){
-                DisplayInstrumentList[i] = "Selected - " + InstrumentList[i];
-                break;
-            }
-        }
 
         getDialog().setTitle("Select Instrument");
         return view;
@@ -83,7 +82,7 @@ public class InstrumentDialogFragment extends DialogFragment implements AdapterV
                 .show();
         //DisplayInstrumentList = InstrumentList;
         //DisplayInstrumentList[position] = "Selected - " + InstrumentList[position];
-        ((MainActivity)getActivity()).dialogFragmentItemSelected(caller, position);
+        ((MainActivity)getActivity()).dialogFragmentItemSelected(caller, 1000+position);
         dismiss();
     }
 
@@ -91,14 +90,15 @@ public class InstrumentDialogFragment extends DialogFragment implements AdapterV
     public void onActivityCreated(Bundle savedInstanceState) {
         //Log.d("Popup", "onActivityCreated");
         super.onActivityCreated(savedInstanceState);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_list_item_1, DisplayInstrumentList);
-        /*CustomAdapter adapter = new CustomAdapter(
+        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+        //        android.R.layout.simple_list_item_1, DisplayInstrumentList);
+        CustomAdapter adapter = new CustomAdapter(
                 getActivity(),
                 InstrumentList,
                 InstrumentImages,
-                InstrumentDescription
-        );*/
+                InstrumentDescription,
+                WhoSelectedInstrument
+                );
 
         InstrumentListView.setAdapter(adapter);
 
