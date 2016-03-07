@@ -466,7 +466,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 case ROTARY:
                     break;
                 case VIBRATO:
-                    Log.d("dataProc","vibrato:" + Float.toString(finalData));
+                    //Log.d("dataProc","vibrato:" + Float.toString(finalData));
                     vibrato += finalData * 2;
                     break;
                 default:
@@ -569,7 +569,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 txt.setText(getDefinedString(selectedItem));
                 rightHand.setEffects(ROLL, selectedItem);
                 break;
-            case "R_inst":
+            case "instrument":
                 txt = (TextView) findViewById(R.id.instText);
                 txt.setText(getDefinedString(selectedItem));
                 rightHand.setInstrument(selectedItem);

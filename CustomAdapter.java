@@ -3,6 +3,7 @@ package complexability.motionmusicv2;
 import android.content.Context;
 import android.graphics.Color;
 import android.media.effect.Effect;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,7 +59,7 @@ public class CustomAdapter extends BaseAdapter {
         txt.setText(data[position]);
         txt2.setText(description[position]);
         img.setImageResource(images[position]);
-
+        //Log.d("hello", Integer.toString(position));
         if(selector[position] != null){
             switch (selector[position]){
                 case "R_fw_selected":

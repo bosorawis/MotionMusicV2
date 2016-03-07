@@ -74,8 +74,8 @@ public class RightHandFragment extends Fragment  {
     }
 
     /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
+     * Use this factory method to create a new instance  this fragment using the provided parameters.of
+     *
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
@@ -206,7 +206,8 @@ public class RightHandFragment extends Fragment  {
             public void onClick(View v) {
                 //Log.d("RightHandFragment", "instrument_btn");
                 Bundle bundle = new Bundle();
-                bundle.putString("previous",getDefinedString(MainActivity.rightHand.getInstrument()));
+                //bundle.putString("previous",getDefinedString(MainActivity.rightHand.getInstrument()));
+                bundle.putString("caller", "instrument");
                 android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
                 InstrumentDialogFragment fragment = new InstrumentDialogFragment();
                 fragment.setArguments(bundle);

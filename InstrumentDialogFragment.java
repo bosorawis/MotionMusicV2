@@ -12,11 +12,26 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.Objects;
+
 /**
  * Created by Sorawis on 2/4/2016.
  */
 public class InstrumentDialogFragment extends DialogFragment implements AdapterView.OnItemClickListener{
 
+    private static final int NONE       = 0;
+    private static final int VOLUME     = 1;
+    private static final int FREQUENCY  = 2;
+    private static final int REVERB     = 3;
+    private static final int DELAY      = 4;
+    private static final int FLANGER    = 5;
+    private static final int DISTORTION = 6;
+    private static final int ROTARY     = 7;
+    private static final int VIBRATO    = 8;
+
+    private static final int SPACY      = 1000;
+    private static final int GUITAR     = 1001;
+    private static final int FLUTE      = 1002;
 
     ListView InstrumentListView;
     protected final String[] InstrumentList = {
@@ -41,7 +56,7 @@ public class InstrumentDialogFragment extends DialogFragment implements AdapterV
             null  // Flute
     };
     protected String[] DisplayInstrumentList = InstrumentList;
-    protected String previous;
+    protected int selected;
     protected String caller;
 
 
@@ -65,9 +80,17 @@ public class InstrumentDialogFragment extends DialogFragment implements AdapterV
         //Log.d("DialogFragment",getArguments().getString("Name"));
         //getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         caller = this.getArguments().getString("caller");
-        previous = this.getArguments().getString("previous");
+        selected = MainActivity.rightHand.getInstrument();
+                //this.getArguments().getInt("instrument_selected");
+        if(selected >= 1000){
+            selected -= 1000;
+        }
+        for(int i = 0 ; i < WhoSelectedInstrument.length ; i++){
+            WhoSelectedInstrument[i] = null;
+        }
+        WhoSelectedInstrument[selected] = "instrument_selected";
 
-
+        Log.d("selected", Integer.toString(selected));
         getDialog().setTitle("Select Instrument");
         return view;
     }
@@ -106,4 +129,34 @@ public class InstrumentDialogFragment extends DialogFragment implements AdapterV
 
     }
 
+    public String getDefinedString(int data){
+        switch (data){
+            case NONE:
+                return "None";
+            case VOLUME:
+                return "Volume";
+            case FREQUENCY:
+                return "Frequency";
+            case REVERB:
+                return "Reverb";
+            case DELAY:
+                return "Delay";
+            case FLANGER:
+                return "Flanger";
+            case DISTORTION:
+                return "Distortion";
+            case ROTARY:
+                return "Rotary";
+            case SPACY:
+                return "Spacy";
+            case GUITAR:
+                return "Guitar";
+            case FLUTE:
+                return "Flute";
+            case VIBRATO:
+                return "Vibrato";
+            default:
+                return null;
+        }
+    }
 }

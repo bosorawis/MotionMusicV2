@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -98,58 +99,83 @@ public class EffectDialogFragment extends DialogFragment implements AdapterView.
         //Log.d("DialogFragment",getArguments().getString("Name"));
         //getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         caller = this.getArguments().getString("caller");
-        SelectedEffects[0] = this.getArguments().getInt("R_fw_selected");
-        SelectedEffects[1] = this.getArguments().getInt("R_ud_selected");
-        SelectedEffects[2] = this.getArguments().getInt("R_lr_selected");
-        SelectedEffects[3] = this.getArguments().getInt("R_pitch_selected");
-        SelectedEffects[4] = this.getArguments().getInt("R_roll_selected");
+        //Log.d("Look Here", String.valueOf(caller.charAt(0)));
 
-
-        for(int i = 0 ; i < EffectList.length ; i++){
-            WhoSelectEffect[i] = null;
-        }
-        for(int i = 0 ; i < SelectedEffects.length ; i++){
-            for (int j = 0 ; j < EffectList.length ; j++){
-                if(Objects.equals(EffectList[j], getDefinedString(SelectedEffects[i]))){
-                    switch (i){
-                        case 0:
-                            WhoSelectEffect[j] = "R_fw_selected";
-                            break;
-                        case 1:
-                            WhoSelectEffect[j] = "R_ud_selected";
-                            break;
-                        case 2:
-                            WhoSelectEffect[j] = "R_lr_selected";
-                            break;
-                        case 3:
-                            WhoSelectEffect[j] = "R_pitch_selected";
-                            break;
-                        case 4:
-                            WhoSelectEffect[j] = "R_roll_selected";
-                            break;
-                        default:
-                            break;
+        if(Objects.equals(String.valueOf(caller.charAt(0)), "R")) {
+            //Log.d("Look Here", caller);
+            SelectedEffects[0] = this.getArguments().getInt("R_fw_selected");
+            SelectedEffects[1] = this.getArguments().getInt("R_ud_selected");
+            SelectedEffects[2] = this.getArguments().getInt("R_lr_selected");
+            SelectedEffects[3] = this.getArguments().getInt("R_pitch_selected");
+            SelectedEffects[4] = this.getArguments().getInt("R_roll_selected");
+            for(int i = 0 ; i < EffectList.length ; i++){
+                WhoSelectEffect[i] = null;
+            }
+            for(int i = 0 ; i < SelectedEffects.length ; i++){
+                for (int j = 0 ; j < EffectList.length ; j++){
+                    if(Objects.equals(EffectList[j], getDefinedString(SelectedEffects[i]))){
+                        switch (i){
+                            case 0:
+                                WhoSelectEffect[j] = "R_fw_selected";
+                                break;
+                            case 1:
+                                WhoSelectEffect[j] = "R_ud_selected";
+                                break;
+                            case 2:
+                                WhoSelectEffect[j] = "R_lr_selected";
+                                break;
+                            case 3:
+                                WhoSelectEffect[j] = "R_pitch_selected";
+                                break;
+                            case 4:
+                                WhoSelectEffect[j] = "R_roll_selected";
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
                     }
-                    break;
                 }
             }
         }
+        else if (Objects.equals(String.valueOf(caller.charAt(0)), "L")) {
+            SelectedEffects[0] = this.getArguments().getInt("L_fw_selected");
+            SelectedEffects[1] = this.getArguments().getInt("L_ud_selected");
+            SelectedEffects[2] = this.getArguments().getInt("L_lr_selected");
+            SelectedEffects[3] = this.getArguments().getInt("L_pitch_selected");
+            SelectedEffects[4] = this.getArguments().getInt("L_roll_selected");
+
+            for(int i = 0 ; i < EffectList.length ; i++){
+                WhoSelectEffect[i] = null;
+            }
+            for(int i = 0 ; i < SelectedEffects.length ; i++){
+                for (int j = 0 ; j < EffectList.length ; j++){
+                    if(Objects.equals(EffectList[j], getDefinedString(SelectedEffects[i]))){
+                        switch (i){
+                            case 0:
+                                WhoSelectEffect[j] = "L_fw_selected";
+                                break;
+                            case 1:
+                                WhoSelectEffect[j] = "L_ud_selected";
+                                break;
+                            case 2:
+                                WhoSelectEffect[j] = "L_lr_selected";
+                                break;
+                            case 3:
+                                WhoSelectEffect[j] = "L_pitch_selected";
+                                break;
+                            case 4:
+                                WhoSelectEffect[j] = "L_roll_selected";
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                }
+            }
 
 
-
-        switch(caller){
-            case "R_fw_selected":
-                break;
-            case "R_ud_selected":
-                break;
-            case "R_lr_selected":
-                break;
-            case "R_pitch_selected":
-                break;
-            case "R_roll_selected":
-                break;
-            default:
-                break;
         }
         getDialog().setTitle("Select Effect");
         return view;
