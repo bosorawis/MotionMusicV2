@@ -442,9 +442,9 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                     volume = finalData;
                     break;
                 case FREQUENCY:
-                    Log.d("dataFreq", "data: " + Integer.toHexString(readData));
-                    Log.d("dataProc","freq:" + Float.toString(finalData));
-                    freq  += finalData/2;
+                    //Log.d("dataFreq", "data: " + Integer.toHexString(readData));
+                    //Log.d("dataProc","freq:" + Float.toString(finalData));
+                    freq  += finalData/8;
                     break;
                 case REVERB:
                     reverb += finalData;
@@ -460,7 +460,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                     break;
                 case VIBRATO:
                     //Log.d("dataProc","vibrato:" + Float.toString(finalData));
-                    vibrato += finalData * 2;
+                    vibrato += finalData * 10;
                     break;
                 default:
                     Log.d("MainActivity", "WTF!!!");
@@ -492,7 +492,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 case FREQUENCY:
                     //Log.d("dataFreq", "data: " + Integer.toHexString(readData));
                     //Log.d("dataProc","freq:" + Float.toString(finalData));
-                    freq  += finalData/2;
+                    freq  += finalData/8;
                     break;
                 case REVERB:
                     reverb += finalData;
