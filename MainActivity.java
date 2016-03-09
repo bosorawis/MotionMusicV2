@@ -89,10 +89,10 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     private static final int Z_ACCEL = 4;
 
     private float volume  = (float) 0.5;
-    private float freq    = (float) 0.0;
+    private float freq    = (float) 0.5;
     private float flanger = (float) 0.0;
     private float reverb  = (float) 0.72;
-    private float vibrato = (float) 0.0;
+    private float vibrato = (float) 0.5;
 
     int rightHandCurrent[] = rightHand.getAllEffect();
     int leftHandCurrent[] = leftHand.getAllEffect();
@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 if(isChecked){
                     //testArr[0].SetValue(0, csdTest);
                     Log.d("MainActivity", "SEND PLAY TO CSD");
-                    csoundObj.sendScore(String.format("i1.%d 0 -2 %d", 0, 0));
+                    csoundObj.sendScore(String.format("i1.%d 0 -0.01 %d", 0, 0));
                 }
                 else{
                     csoundObj.sendScore(String.format("i-1.%d 0 0 %d", 0, 0));                }
@@ -195,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 //Log.d("MainActivity", message);
 
                 //TODO
-                //data[] is 5 bytes long
+                // data[] is 5 bytes long
                 // data[0] - 90     pitch
                 // data[1] - 90     roll
                 // data[2] - 100    x_speed
@@ -223,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         /**
          * CSD initialization
          */
-        String csd = getResourceFileAsString(R.raw.test);
+        String csd = getResourceFileAsString(R.raw.oscil);
         File f = createTempFile(csd);
         csoundObj.addBinding(this);
         csoundObj.startCsound(f);
@@ -444,7 +444,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 case FREQUENCY:
                     //Log.d("dataFreq", "data: " + Integer.toHexString(readData));
                     //Log.d("dataProc","freq:" + Float.toString(finalData));
-                    freq  += finalData/8;
+                    freq  += finalData;
                     break;
                 case REVERB:
                     reverb += finalData;
@@ -492,7 +492,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 case FREQUENCY:
                     //Log.d("dataFreq", "data: " + Integer.toHexString(readData));
                     //Log.d("dataProc","freq:" + Float.toString(finalData));
-                    freq  += finalData/8;
+                    freq  += finalData;
                     break;
                 case REVERB:
                     reverb += finalData;
