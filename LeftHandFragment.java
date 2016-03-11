@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,6 +90,55 @@ public class LeftHandFragment extends Fragment{
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("Blah",1);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if(savedInstanceState != null){
+            Log.d("LeftHand", "savedinstantstate");
+            Bundle bundle = new Bundle();
+            bundle.putString("caller","saved");
+
+            bundle.putInt("L_pitch_selected", MainActivity.leftHand.getEffect(0));
+            bundle.putInt("L_roll_selected", MainActivity.leftHand.getEffect(1));
+            bundle.putInt("L_fw_selected", MainActivity.leftHand.getEffect(2));
+            bundle.putInt("L_ud_selected", MainActivity.leftHand.getEffect(3));
+            bundle.putInt("L_lr_selected", MainActivity.leftHand.getEffect(4));
+            bundle.putInt("L_instrument", MainActivity.leftHand.getInstrument());
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_left_hand, container, false);
@@ -101,6 +151,7 @@ public class LeftHandFragment extends Fragment{
         Button roll_btn         = (Button) view.findViewById(R.id.lh_roll_btn);
         Button left_right_btn   = (Button) view.findViewById(R.id.lh_left_right_btn);
         Button up_down_btn      = (Button) view.findViewById(R.id.lh_up_down_btn);
+        //Button instr_button     = (Button) view.findViewById(R.id.left_instrument);
         /**
          * Text Views
          */
@@ -109,13 +160,14 @@ public class LeftHandFragment extends Fragment{
         TextView upDown_txt     = (TextView) view.findViewById(R.id.l_upDownText);
         TextView pitch_txt      = (TextView) view.findViewById(R.id.l_pitchText);
         TextView roll_txt       = (TextView) view.findViewById(R.id.l_rollText);
+        //TextView inst_txt       = (TextView) view.findViewById(R.id.leftInstrumentTxt);
 
         pitch_txt.setText(getDefinedString(MainActivity.leftHand.getEffect(0)));
         roll_txt.setText(getDefinedString(MainActivity.leftHand.getEffect(1)));
         fwBack_txt.setText(getDefinedString(MainActivity.leftHand.getEffect(2)));
         upDown_txt.setText(getDefinedString(MainActivity.leftHand.getEffect(3)));
         leftRight_txt.setText(getDefinedString(MainActivity.leftHand.getEffect(4)));
-
+        //inst_txt.setText(getDefinedString(MainActivity.leftHand.getInstrument()));
         //fw_back_btn.setOnClickListener(this);
 
 
@@ -189,6 +241,21 @@ public class LeftHandFragment extends Fragment{
                 fragment.show(fm, "dialog_effect_fragment");
             }
         });
+        /*
+        instr_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Log.d("RightHandFragment", "instrument_btn");
+                Bundle bundle = new Bundle();
+                //bundle.putString("previous",getDefinedString(MainActivity.rightHand.getInstrument()));
+                bundle.putString("caller", "l_instrument");
+                android.support.v4.app.FragmentManager fm = myContext.getSupportFragmentManager();
+                InstrumentDialogFragment fragment = new InstrumentDialogFragment();
+                fragment.setArguments(bundle);
+                fragment.show(fm, "dialog_instrument_fragment");
+            }
+        });
+        */
         /**********************************************************
          **********************************************************/
 
@@ -212,7 +279,7 @@ public class LeftHandFragment extends Fragment{
         bundle.putInt("L_fw_selected", MainActivity.leftHand.getEffect(2));
         bundle.putInt("L_ud_selected", MainActivity.leftHand.getEffect(3));
         bundle.putInt("L_lr_selected", MainActivity.leftHand.getEffect(4));
-
+        bundle.putInt("L_instrument", MainActivity.leftHand.getInstrument());
         return bundle;
     }
 

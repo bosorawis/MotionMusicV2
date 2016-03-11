@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -59,6 +60,21 @@ import csnd6.controlChannelType;
 public class MainActivity extends AppCompatActivity implements LeftHandFragment.OnFragmentInteractionListener, RightHandFragment.OnFragmentInteractionListener, CsoundObjListener,CsoundBinding {
     public static Hands rightHand = new Hands();
     public static Hands leftHand  = new Hands();
+
+    private static final String INSTRUMENT_STATE = "instrument";
+    private static final String RIGHT_ACCEL_X_STATE = "right_x";
+    private static final String RIGHT_ACCEL_Y_STATE = "right_y";
+    private static final String RIGHT_ACCEL_Z_STATE = "right_z";
+    private static final String RIGHT_ROLL_STATE = "right_roll";
+    private static final String RIGHT_PITCH_STATE = "right_pitch";
+
+    private static final String LEFT_ACCEL_X_STATE = "left_x";
+    private static final String LEFT_ACCEL_Y_STATE = "left_y";
+    private static final String LEFT_ACCEL_Z_STATE = "left_z";
+    private static final String LEFT_ROLL_STATE    = "left_roll";
+    private static final String LEFT_PITCH_STATE   = "left_pitch";
+
+
     /**
      * Variable for Csound
      */
@@ -96,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
     int rightHandCurrent[] = rightHand.getAllEffect();
     int leftHandCurrent[] = leftHand.getAllEffect();
-
+    File f;
 
     static List<String> selectedItem = new ArrayList<String>();
     /************************
@@ -115,18 +131,39 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     protected  BluetoothSPP bt;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        rightHand.setInstrument(SPACY);
-        rightHand.setEffects(PITCH, FLANGER);
-        rightHand.setEffects(ROLL, NONE);
-        rightHand.setEffects(X_ACCEL, NONE);
-        rightHand.setEffects(Y_ACCEL, NONE);
-        rightHand.setEffects(Z_ACCEL, NONE);
+        Log.d("MainActivity", "onCreate");
+        if(savedInstanceState != null) {
+            Log.d("MainActivity", "savedInstanceState != null");
+            rightHand.setInstrument(savedInstanceState.getInt(INSTRUMENT_STATE));
+            rightHand.setEffects(PITCH, savedInstanceState.getInt(RIGHT_PITCH_STATE));
+            rightHand.setEffects(ROLL, savedInstanceState.getInt(RIGHT_ROLL_STATE));
+            rightHand.setEffects(Y_ACCEL, savedInstanceState.getInt(RIGHT_ACCEL_Y_STATE));
+            rightHand.setEffects(Z_ACCEL, savedInstanceState.getInt(RIGHT_ACCEL_Z_STATE));
+            rightHand.setEffects(X_ACCEL, savedInstanceState.getInt(RIGHT_ACCEL_X_STATE));
 
-        leftHand.setEffects(PITCH, NONE);
-        leftHand.setEffects(ROLL, NONE);
-        leftHand.setEffects(X_ACCEL, NONE);
-        leftHand.setEffects(Y_ACCEL, NONE);
-        leftHand.setEffects(Z_ACCEL, NONE);
+            //leftHand.setInstrument(SPACY);
+            leftHand.setEffects(PITCH, savedInstanceState.getInt(LEFT_PITCH_STATE));
+            leftHand.setEffects(ROLL, savedInstanceState.getInt(LEFT_ROLL_STATE));
+            leftHand.setEffects(Y_ACCEL, savedInstanceState.getInt(LEFT_ACCEL_Y_STATE));
+            leftHand.setEffects(Z_ACCEL, savedInstanceState.getInt(LEFT_ACCEL_Z_STATE));
+            leftHand.setEffects(X_ACCEL, savedInstanceState.getInt(LEFT_ACCEL_X_STATE));
+
+        }
+        else{
+            rightHand.setInstrument(SPACY);
+            rightHand.setEffects(PITCH, NONE);
+            rightHand.setEffects(ROLL, NONE);
+            rightHand.setEffects(X_ACCEL, NONE);
+            rightHand.setEffects(Y_ACCEL, NONE);
+            rightHand.setEffects(Z_ACCEL, NONE);
+
+            leftHand.setInstrument(SPACY);
+            leftHand.setEffects(PITCH, NONE);
+            leftHand.setEffects(ROLL, NONE);
+            leftHand.setEffects(X_ACCEL, NONE);
+            leftHand.setEffects(Y_ACCEL, NONE);
+            leftHand.setEffects(Z_ACCEL, NONE);
+        }
         //selectedRightHandEffect = rightHand.getAllEffect();
 
         super.onCreate(savedInstanceState);
@@ -139,6 +176,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
         final Button testButton = (Button) findViewById(R.id.testButton);
         startStop = (ToggleButton) findViewById(R.id.onOffButton);
+        startStop.setChecked(false);
         /*
         Here for testing csound
          */
@@ -193,6 +231,12 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             public void onDataReceived(byte[] data, String message) {
                 //Toast.makeText(SimpleActivity.this, message, Toast.LENGTH_SHORT).show();
                 //Log.d("MainActivity", message);
+                Log.i("BT RECEIVED","START");
+                for (byte b: data){
+                    Log.i("BT RECEIVED", String.format("0x%20x", b));
+                }
+                Log.i("BT RECEIVED", "size: " + Integer.toString(data.length));
+                Log.i("BT RECEIVED", "END");
 
                 //TODO
                 // data[] is 5 bytes long
@@ -214,9 +258,12 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             public void onClick(View v) {
                 //Show the dialog
                 //rightHand.showSelected();
-                int[] byteArrayTest = new int[]{0xFD, 0x2D, 0x64, 0x64, 0x64 };
-                int testValue = byteArrayTest[0];
-                Log.d("testButtonClick", "Byte:" + Integer.toString(testValue - 128));
+                Log.d("TEST", "BEGIN RIGHT HAND");
+                Log.d("TEST","RIGHT INSTRUMENT: " + getDefinedString(rightHand.getInstrument()));
+                rightHand.showSelected();
+                Log.d("TEST", "BEGIN LEFT HAND");
+                Log.d("TEST","LEFT INSTRUMENT: " + getDefinedString(leftHand.getInstrument()));
+                leftHand.showSelected();
             }
         });
 
@@ -224,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
          * CSD initialization
          */
         String csd = getResourceFileAsString(R.raw.oscil);
-        File f = createTempFile(csd);
+        f = createTempFile(csd);
         csoundObj.addBinding(this);
         csoundObj.startCsound(f);
         //END CSD
@@ -248,6 +295,89 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             }
         }
         //*********************************************
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("MainActivity", "onStop");
+        csoundObj.stop();
+        csoundObjCompleted(csoundObj);
+
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d("MainActivity","onRestart");
+        String csd = getResourceFileAsString(R.raw.oscil);
+        f = createTempFile(csd);
+        csoundObj.addBinding(this);
+        csoundObj.startCsound(f);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //cleanup();
+        //if(!csoundObj.isPaused()) {
+        csoundObj.stop();
+        csoundObjCompleted(csoundObj);
+        //}
+        //csoundObj.stop();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d("MainActivity", "onDestroy");
+        super.onDestroy();
+        f.delete();
+        //csoundObj.stop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d("MainActivity", "onSaveInstanceState");
+        outState.putInt(RIGHT_ROLL_STATE, rightHand.getEffect(ROLL));
+        outState.putInt(RIGHT_PITCH_STATE, rightHand.getEffect(PITCH));
+        outState.putInt(RIGHT_ACCEL_Y_STATE, rightHand.getEffect(Y_ACCEL));
+        outState.putInt(RIGHT_ACCEL_Z_STATE, rightHand.getEffect(Z_ACCEL));
+        outState.putInt(RIGHT_ACCEL_X_STATE, rightHand.getEffect(X_ACCEL));
+
+        outState.putInt(LEFT_ROLL_STATE,   leftHand.getEffect(ROLL));
+        outState.putInt(LEFT_PITCH_STATE,  leftHand.getEffect(PITCH));
+        outState.putInt(LEFT_ACCEL_Y_STATE,leftHand.getEffect(Y_ACCEL));
+        outState.putInt(LEFT_ACCEL_Z_STATE, leftHand.getEffect(Z_ACCEL));
+        outState.putInt(LEFT_ACCEL_X_STATE, leftHand.getEffect(X_ACCEL));
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        Log.d("MainActivity", "onRestoreInstanceState");
+        rightHand.setInstrument(savedInstanceState.getInt(INSTRUMENT_STATE));
+        rightHand.setEffects(PITCH, savedInstanceState.getInt(RIGHT_PITCH_STATE));
+        rightHand.setEffects(ROLL, savedInstanceState.getInt(RIGHT_ROLL_STATE));
+        rightHand.setEffects(Y_ACCEL, savedInstanceState.getInt(RIGHT_ACCEL_Y_STATE));
+        rightHand.setEffects(Z_ACCEL, savedInstanceState.getInt(RIGHT_ACCEL_Z_STATE));
+        rightHand.setEffects(X_ACCEL, savedInstanceState.getInt(RIGHT_ACCEL_X_STATE));
+
+        //leftHand.setInstrument(SPACY);
+        leftHand.setEffects(PITCH, savedInstanceState.getInt(LEFT_PITCH_STATE));
+        leftHand.setEffects(ROLL, savedInstanceState.getInt(LEFT_ROLL_STATE));
+        leftHand.setEffects(Y_ACCEL, savedInstanceState.getInt(LEFT_ACCEL_Y_STATE));
+        leftHand.setEffects(Z_ACCEL, savedInstanceState.getInt(LEFT_ACCEL_Z_STATE));
+        leftHand.setEffects(X_ACCEL, savedInstanceState.getInt(LEFT_ACCEL_X_STATE));
+
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -460,7 +590,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                     break;
                 case VIBRATO:
                     //Log.d("dataProc","vibrato:" + Float.toString(finalData));
-                    vibrato += finalData * 10;
+                    vibrato += finalData;
                     break;
                 default:
                     Log.d("MainActivity", "WTF!!!");
@@ -508,7 +638,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                     break;
                 case VIBRATO:
                     Log.d("dataProc","vibrato:" + Float.toString(finalData));
-                    vibrato += finalData * 2;
+                    vibrato += finalData;
                     break;
 
                 default:
@@ -608,6 +738,11 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 txt.setText(getDefinedString(selectedItem));
                 leftHand.setEffects(4, selectedItem);
                 break;
+            //case "l_instrument":
+            //    txt = (TextView) findViewById(R.id.leftInstrumentTxt);
+            //    txt.setText(getDefinedString(selectedItem));
+            //    leftHand.setInstrument(selectedItem);
+            //    break;
 
             default:
                 break;

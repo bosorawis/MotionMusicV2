@@ -15,6 +15,21 @@ import android.widget.TextView;
  * Created by Sorawis on 2/21/2016.
  */
 public class CustomAdapter extends BaseAdapter {
+
+    private static final int NONE       = 0;
+    private static final int VOLUME     = 1;
+    private static final int FREQUENCY  = 2;
+    private static final int REVERB     = 3;
+    private static final int DELAY      = 4;
+    private static final int FLANGER    = 5;
+    private static final int DISTORTION = 6;
+    private static final int ROTARY     = 7;
+    private static final int VIBRATO     = 8;
+
+
+    private static final int SPACY      = 1000;
+    private static final int GUITAR     = 1001;
+    private static final int FLUTE      = 1002;
     String[] data;
     String[] description;
     String[] selector;
@@ -60,6 +75,7 @@ public class CustomAdapter extends BaseAdapter {
         txt2.setText(description[position]);
         img.setImageResource(images[position]);
         //Log.d("hello", Integer.toString(position));
+
         if(selector[position] != null){
             switch (selector[position]){
                 case "R_fw_selected":
@@ -96,11 +112,47 @@ public class CustomAdapter extends BaseAdapter {
                 case    "instrument_selected":
                     convertView.setBackgroundColor(Color.parseColor("#767873"));
                     break;
-
+                /*
+                case    "L_instrument":
+                    convertView.setBackgroundColor(Color.parseColor("#767873"));
+                    break;
+                */
                 default:
                     break;
             }
         }
-        return convertView;
+
+            return convertView;
     }
+    public String getDefinedString(int data){
+        switch (data){
+            case NONE:
+                return "None";
+            case VOLUME:
+                return "Volume";
+            case FREQUENCY:
+                return "Frequency";
+            case REVERB:
+                return "Reverb";
+            case DELAY:
+                return "Delay";
+            case FLANGER:
+                return "Flanger";
+            case DISTORTION:
+                return "Distortion";
+            case ROTARY:
+                return "Rotary";
+            case SPACY:
+                return "Spacy";
+            case GUITAR:
+                return "Guitar";
+            case FLUTE:
+                return "Flute";
+            case VIBRATO:
+                return "Vibrato";
+            default:
+                return null;
+        }
+    }
+
 }

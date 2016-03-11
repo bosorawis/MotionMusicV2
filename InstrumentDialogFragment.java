@@ -56,7 +56,9 @@ public class InstrumentDialogFragment extends DialogFragment implements AdapterV
             null  // Flute
     };
     protected String[] DisplayInstrumentList = InstrumentList;
-    protected int selected;
+    protected int rightSelected;
+    protected int leftSelected;
+
     protected String caller;
 
 
@@ -80,17 +82,24 @@ public class InstrumentDialogFragment extends DialogFragment implements AdapterV
         //Log.d("DialogFragment",getArguments().getString("Name"));
         //getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         caller = this.getArguments().getString("caller");
-        selected = MainActivity.rightHand.getInstrument();
+        rightSelected = MainActivity.rightHand.getInstrument();
+        //leftSelected = MainActivity.leftHand.getInstrument();
                 //this.getArguments().getInt("instrument_selected");
-        if(selected >= 1000){
-            selected -= 1000;
+        if(rightSelected >= 1000){
+            rightSelected -= 1000;
         }
+        /*
+        if(leftSelected >= 1000){
+            leftSelected -= 1000;
+        }
+        */
         for(int i = 0 ; i < WhoSelectedInstrument.length ; i++){
             WhoSelectedInstrument[i] = null;
         }
-        WhoSelectedInstrument[selected] = "instrument_selected";
+        WhoSelectedInstrument[rightSelected] = "instrument_selected";
+        //WhoSelectedInstrument[leftSelected] = "L_instrument";
 
-        Log.d("selected", Integer.toString(selected));
+        Log.d("selected", Integer.toString(rightSelected));
         getDialog().setTitle("Select Instrument");
         return view;
     }

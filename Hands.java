@@ -56,9 +56,9 @@ public class Hands {
     }
     public void showSelected(){
         for(int i = 0 ; i < Effects.length;  i++){
-            Log.d("Hands ","["+ Integer.toString(i) + "]: " + getDefinedString(Effects[i]) );
+            Log.d("TEST ","Effect["+ effectType(i) + "]: " + getDefinedString(Effects[i]) );
         }
-        Log.d("Hands ", getDefinedString(Instrument));
+        //Log.d("Hands ", getDefinedString(Instrument));
     }
     public String getDefinedString(int data){
         switch (data){
@@ -86,6 +86,23 @@ public class Hands {
                 return "Flute";
             default:
                 return null;
+        }
+    }
+    public String effectType(int type){
+        switch(type){
+            case 0:
+                return "PITCH";
+            case 1:
+                return "ROLL";
+            case 2:
+                return "Y-AXIS";
+            case 3:
+                return "Z-AXIS";
+            case 4:
+                return "X-AXIS";
+            default:
+                return "NONE";
+
         }
     }
 }
