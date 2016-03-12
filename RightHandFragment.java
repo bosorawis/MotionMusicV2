@@ -47,7 +47,6 @@ public class RightHandFragment extends Fragment  {
     private FragmentActivity myContext;
 
     private OnFragmentInteractionListener mListener;
-
     /**
      * Csound parameter handlers
      */

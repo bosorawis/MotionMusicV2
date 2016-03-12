@@ -94,8 +94,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     private static final int GUITAR     = 1001;
     private static final int FLUTE      = 1002;
 
-    private static final int MAX_ACCELEROMETER    = 200;
-    private static final int MAX_GYROSCOPE        = 180;
+    private static final int MAX_ACCELEROMETER    = 255;
+    private static final int MAX_GYROSCOPE        = 255;
 
 
     private static final int PITCH   = 0;
@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     //protected Handler handler = new Handler();
     ToggleButton startStop;
     float csdTest = 0;
-
+    boolean btActivityStart = false;
     //Bluetooth Initialization
     protected  BluetoothSPP bt;
     @Override
@@ -231,12 +231,12 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             public void onDataReceived(byte[] data, String message) {
                 //Toast.makeText(SimpleActivity.this, message, Toast.LENGTH_SHORT).show();
                 //Log.d("MainActivity", message);
-                Log.i("BT RECEIVED","START");
-                for (byte b: data){
-                    Log.i("BT RECEIVED", String.format("0x%20x", b));
-                }
-                Log.i("BT RECEIVED", "size: " + Integer.toString(data.length));
-                Log.i("BT RECEIVED", "END");
+                //Log.i("BT RECEIVED","START");
+                //for (byte b: data){
+                    //Log.i("BT RECEIVED", String.format("0x%20x", b));
+                //}
+                //Log.i("BT RECEIVED", "size: " + Integer.toString(data.length));
+                //Log.i("BT RECEIVED", "END");
 
                 //TODO
                 // data[] is 5 bytes long
@@ -258,11 +258,11 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             public void onClick(View v) {
                 //Show the dialog
                 //rightHand.showSelected();
-                Log.d("TEST", "BEGIN RIGHT HAND");
-                Log.d("TEST","RIGHT INSTRUMENT: " + getDefinedString(rightHand.getInstrument()));
+                //Log.d("TEST", "BEGIN RIGHT HAND");
+                //Log.d("TEST","RIGHT INSTRUMENT: " + getDefinedString(rightHand.getInstrument()));
                 rightHand.showSelected();
-                Log.d("TEST", "BEGIN LEFT HAND");
-                Log.d("TEST","LEFT INSTRUMENT: " + getDefinedString(leftHand.getInstrument()));
+                //Log.d("TEST", "BEGIN LEFT HAND");
+                //Log.d("TEST","LEFT INSTRUMENT: " + getDefinedString(leftHand.getInstrument()));
                 leftHand.showSelected();
             }
         });
@@ -283,6 +283,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         More bluetooth handler
          */
         super.onStart();
+        btActivityStart = false;
         if (!bt.isBluetoothEnabled()) {
             Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(intent, BluetoothState.REQUEST_ENABLE_BT);
@@ -300,6 +301,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     @Override
     protected void onStop() {
         super.onStop();
+
         Log.d("MainActivity", "onStop");
         csoundObj.stop();
         csoundObjCompleted(csoundObj);
@@ -319,12 +321,14 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
     @Override
     protected void onPause() {
+
         super.onPause();
         //cleanup();
         //if(!csoundObj.isPaused()) {
-        csoundObj.stop();
-        csoundObjCompleted(csoundObj);
-        //}
+        //if(!btActivityStart) {
+            csoundObj.stop();
+            csoundObjCompleted(csoundObj);
+        //}//}
         //csoundObj.stop();
 
     }
@@ -332,8 +336,10 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     @Override
     protected void onDestroy() {
         Log.d("MainActivity", "onDestroy");
-        super.onDestroy();
-        f.delete();
+        //if(!btActivityStart) {
+            super.onDestroy();
+            f.delete();
+        //}
         //csoundObj.stop();
     }
 
@@ -352,8 +358,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         outState.putInt(RIGHT_ACCEL_Z_STATE, rightHand.getEffect(Z_ACCEL));
         outState.putInt(RIGHT_ACCEL_X_STATE, rightHand.getEffect(X_ACCEL));
 
-        outState.putInt(LEFT_ROLL_STATE,   leftHand.getEffect(ROLL));
-        outState.putInt(LEFT_PITCH_STATE,  leftHand.getEffect(PITCH));
+        outState.putInt(LEFT_ROLL_STATE, leftHand.getEffect(ROLL));
+        outState.putInt(LEFT_PITCH_STATE, leftHand.getEffect(PITCH));
         outState.putInt(LEFT_ACCEL_Y_STATE,leftHand.getEffect(Y_ACCEL));
         outState.putInt(LEFT_ACCEL_Z_STATE, leftHand.getEffect(Z_ACCEL));
         outState.putInt(LEFT_ACCEL_X_STATE, leftHand.getEffect(X_ACCEL));
@@ -381,6 +387,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        btActivityStart = false;
         if(requestCode == BluetoothState.REQUEST_CONNECT_DEVICE) {
             if(resultCode == Activity.RESULT_OK)
                 bt.connect(data);
@@ -417,6 +424,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             return true;
         }
         else if (id == R.id.action_bluetooth){
+             btActivityStart = true;
             Log.d("MainActivity", "Bluetooth Select");
             if (bt.getServiceState() == BluetoothState.STATE_CONNECTED) {
                 bt.disconnect();
@@ -550,39 +558,41 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         int readData;
         reInitiate();
         for (int i = 0 ; i < rightHandEffects.length ; i++){
-            finalData = 0;
+
             if (i >= data.length){
                 return;
             }
-            readData = data[i];
+            readData = data[i] & 0x000000FF;
+            Log.d("dataProc", "data raw[" +Integer.toString(i) +":]" + Integer.toString(readData));
 
             if(i <= 1){
-                finalData = (float)(readData)/(MAX_GYROSCOPE);
+                finalData = (float) ((readData))/(MAX_GYROSCOPE);
                 //Log.d("dataProc", "In if:" + Float.toString(finalData));
             }
             else{
-                finalData = (float)(readData)/(MAX_ACCELEROMETER);
+                finalData = (float) ((readData))/(MAX_ACCELEROMETER);
             }
+            Log.d("dataProc", "data float["+ Integer.toString(i) +"]:" + Float.toString(finalData));
 
             switch(rightHandEffects[i]){
                 case NONE:
                     break;
                 case VOLUME:
                     //Log.d("dataProc","volume:" + Float.toString(finalData));
-                    volume = finalData;
+                    volume = (finalData);
                     break;
                 case FREQUENCY:
                     //Log.d("dataFreq", "data: " + Integer.toHexString(readData));
                     //Log.d("dataProc","freq:" + Float.toString(finalData));
-                    freq  += finalData;
+                    freq  = (finalData);
                     break;
                 case REVERB:
-                    reverb += finalData;
+                    reverb = (finalData);
                     break;
                 case DELAY:
                     break;
                 case FLANGER:
-                    flanger += finalData;
+                    flanger = (finalData);
                     break;
                 case DISTORTION:
                     break;
@@ -590,7 +600,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                     break;
                 case VIBRATO:
                     //Log.d("dataProc","vibrato:" + Float.toString(finalData));
-                    vibrato += finalData;
+                    vibrato = (finalData);
                     break;
                 default:
                     Log.d("MainActivity", "WTF!!!");
@@ -600,9 +610,12 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         //LeftHand Handler
         for(int i = 0 ; i < LeftHandEffects.length ; i++){
             finalData = 0;
-            if (i+5 >= data.length){
-                return;
-            }
+            break;
+            //if (i+5 <= data.length){
+                //return;
+            //}
+            //TODO
+            /*
             readData = data[i+5];
             //Log.d("DataReceived","Num: "+ Integer.toString(i) + " \tdata: " + Integer.toString(readData));
             if(i <= 1){
@@ -645,6 +658,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                     Log.d("MainActivity", "WTF!!!");
                     break;
             }
+            */
         }
 
 
@@ -655,9 +669,11 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
     @Override
     public void cleanup() {
-        for (int i = 0; i < testArr.length; i++) {
-            testArr[i].Clear();
-            testArr[i] = null;
+        if(!btActivityStart) {
+            for (int i = 0; i < testArr.length; i++) {
+                testArr[i].Clear();
+                testArr[i] = null;
+            }
         }
     }
 
