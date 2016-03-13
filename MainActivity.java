@@ -26,6 +26,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -34,6 +35,9 @@ import android.widget.ToggleButton;
 import com.csounds.CsoundObj;
 import com.csounds.CsoundObjListener;
 import com.csounds.bindings.CsoundBinding;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -57,9 +61,9 @@ import csnd6.controlChannelType;
  * **Bluetooth
  * **Csound
  */
-public class MainActivity extends AppCompatActivity implements LeftHandFragment.OnFragmentInteractionListener, RightHandFragment.OnFragmentInteractionListener, CsoundObjListener,CsoundBinding {
+public class MainActivity extends AppCompatActivity implements LeftHandFragment.OnFragmentInteractionListener, RightHandFragment.OnFragmentInteractionListener, CsoundObjListener, CsoundBinding {
     public static Hands rightHand = new Hands();
-    public static Hands leftHand  = new Hands();
+    public static Hands leftHand = new Hands();
 
     private static final String INSTRUMENT_STATE = "instrument";
     private static final String RIGHT_ACCEL_X_STATE = "right_x";
@@ -71,52 +75,65 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     private static final String LEFT_ACCEL_X_STATE = "left_x";
     private static final String LEFT_ACCEL_Y_STATE = "left_y";
     private static final String LEFT_ACCEL_Z_STATE = "left_z";
-    private static final String LEFT_ROLL_STATE    = "left_roll";
-    private static final String LEFT_PITCH_STATE   = "left_pitch";
+    private static final String LEFT_ROLL_STATE = "left_roll";
+    private static final String LEFT_PITCH_STATE = "left_pitch";
 
 
     /**
      * Variable for Csound
      */
 
-    private static final int NONE       = 0;
-    private static final int VOLUME     = 1;
-    private static final int FREQUENCY  = 2;
-    private static final int REVERB     = 3;
-    private static final int DELAY      = 4;
-    private static final int FLANGER    = 5;
+    private static final int NONE = 0;
+    private static final int VOLUME = 1;
+    private static final int FREQUENCY = 2;
+    private static final int REVERB = 3;
+    private static final int DELAY = 4;
+    private static final int FLANGER = 5;
     private static final int DISTORTION = 6;
-    private static final int ROTARY     = 7;
-    private static final int VIBRATO     = 8;
+    private static final int ROTARY = 7;
+    private static final int VIBRATO = 8;
 
 
-    private static final int SPACY      = 1000;
-    private static final int GUITAR     = 1001;
-    private static final int FLUTE      = 1002;
+    private static final int SPACY = 1000;
+    private static final int GUITAR = 1001;
+    private static final int FLUTE = 1002;
 
-    private static final int MAX_ACCELEROMETER    = 255;
-    private static final int MAX_GYROSCOPE        = 255;
+    private static final int PITCH_DAT  = 2000;
+    private static final int ROLL_DAT   = 2001;
+    private static final int X_AXIS     = 2002;
+    private static final int Y_AXIS     = 2003;
+    private static final int Z_AXIS     = 2004;
 
 
-    private static final int PITCH   = 0;
-    private static final int ROLL    = 1;
+    private static final int MAX_ACCELEROMETER = 190;
+    private static final int MAX_GYROSCOPE = 190;
+    private static final int DATA_LENGTH = 5;
+
+    private static final int STEP_THRESHOLD = 5;
+
+
+    private static final int PITCH = 0;
+    private static final int ROLL = 1;
     private static final int X_ACCEL = 2;
     private static final int Y_ACCEL = 3;
     private static final int Z_ACCEL = 4;
 
-    private float volume  = (float) 0.5;
-    private float freq    = (float) 0.5;
+    private float volume = (float) 0.5;
+    private float freq = (float) 0.5;
     private float flanger = (float) 0.0;
-    private float reverb  = (float) 0.72;
+    private float reverb = (float) 0.72;
     private float vibrato = (float) 0.5;
-
+    TextView _pitchTextTest;
+    TextView _rollTextTest ;
     int rightHandCurrent[] = rightHand.getAllEffect();
     int leftHandCurrent[] = leftHand.getAllEffect();
     File f;
+    boolean _bt_logdata = false;
+    boolean _log_step = false;
 
     static List<String> selectedItem = new ArrayList<String>();
     /************************
-    Csound initialization
+     * Csound initialization
      ************************/
     CsoundObj csoundObj = new CsoundObj();
     //Structure:
@@ -128,11 +145,18 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     float csdTest = 0;
     boolean btActivityStart = false;
     //Bluetooth Initialization
-    protected  BluetoothSPP bt;
+    protected BluetoothSPP bt;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d("MainActivity", "onCreate");
-        if(savedInstanceState != null) {
+
+        if (savedInstanceState != null) {
             Log.d("MainActivity", "savedInstanceState != null");
             rightHand.setInstrument(savedInstanceState.getInt(INSTRUMENT_STATE));
             rightHand.setEffects(PITCH, savedInstanceState.getInt(RIGHT_PITCH_STATE));
@@ -148,8 +172,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             leftHand.setEffects(Z_ACCEL, savedInstanceState.getInt(LEFT_ACCEL_Z_STATE));
             leftHand.setEffects(X_ACCEL, savedInstanceState.getInt(LEFT_ACCEL_X_STATE));
 
-        }
-        else{
+        } else {
             rightHand.setInstrument(SPACY);
             rightHand.setEffects(PITCH, NONE);
             rightHand.setEffects(ROLL, NONE);
@@ -174,37 +197,83 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         //TODO
         //Default value hard coded for testing
 
+
+        _pitchTextTest = (TextView)findViewById(R.id.PitchValtextView);
+        _rollTextTest  = (TextView)findViewById(R.id.RollValTextView) ;
+
         final Button testButton = (Button) findViewById(R.id.testButton);
+        final Switch testSwitch = (Switch) findViewById(R.id.logSwitch);
+        final Switch stepSwitch = (Switch) findViewById(R.id.stepSwitch);
         startStop = (ToggleButton) findViewById(R.id.onOffButton);
         startStop.setChecked(false);
         /*
         Here for testing csound
          */
-        startStop.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        testSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
-                    //testArr[0].SetValue(0, csdTest);
-                    Log.d("MainActivity", "SEND PLAY TO CSD");
-                    csoundObj.sendScore(String.format("i1.%d 0 -0.01 %d", 0, 0));
+                    _bt_logdata = true;
                 }
                 else{
-                    csoundObj.sendScore(String.format("i-1.%d 0 0 %d", 0, 0));                }
+                    _bt_logdata =  false;
+                }
             }
         });
+        stepSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    _log_step = true;
+                }
+                else{
+                    _log_step = false;
+                }
+            }
+        });
+        startStop.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    //testArr[0].SetValue(0, csdTest);
+                    Log.d("MainActivity", "SEND PLAY TO CSD");
+                    switch (rightHand.getInstrument()) {
+                        case SPACY:
+                            csoundObj.sendScore(String.format("i1.%d 0 -0.01 %d", 0, 0));
+                            break;
+                        case GUITAR:
+                            csoundObj.sendScore(String.format("i2.%d 0 -0.01 %d", 0, 0));
+                            break;
+                        default:
+                            break;
+                    }
+                } else {
+                    switch (rightHand.getInstrument()) {
+                        case SPACY:
+                            csoundObj.sendScore(String.format("i-1.%d 0 0 %d", 0, 0));
+                            break;
+                        case GUITAR:
+                            csoundObj.sendScore(String.format("i-2.%d 0 0 %d", 0, 0));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        });
+
         //**********************************************************************************
         /*
         Handle Bluetooth stuff here
          */
         bt = new BluetoothSPP(this);
 
-        if(!bt.isBluetoothAvailable()){
-            Toast.makeText(getApplicationContext() , "Bluetooth is not available", Toast.LENGTH_SHORT).show();
+        if (!bt.isBluetoothAvailable()) {
+            Toast.makeText(getApplicationContext(), "Bluetooth is not available", Toast.LENGTH_SHORT).show();
             Log.d("MainActivity", "Bluetooth is NOT available");
             finish();
-        }
-        else{
-            Log.d("MainActivity","Bluetooth is available");
+        } else {
+            Log.d("MainActivity", "Bluetooth is available");
         }
 
         bt.setBluetoothConnectionListener(new BluetoothSPP.BluetoothConnectionListener() {
@@ -229,25 +298,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
          */
         bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
             public void onDataReceived(byte[] data, String message) {
-                //Toast.makeText(SimpleActivity.this, message, Toast.LENGTH_SHORT).show();
-                //Log.d("MainActivity", message);
-                //Log.i("BT RECEIVED","START");
-                //for (byte b: data){
-                    //Log.i("BT RECEIVED", String.format("0x%20x", b));
-                //}
-                //Log.i("BT RECEIVED", "size: " + Integer.toString(data.length));
-                //Log.i("BT RECEIVED", "END");
-
-                //TODO
-                // data[] is 5 bytes long
-                // data[0] - 90     pitch
-                // data[1] - 90     roll
-                // data[2] - 100    x_speed
-                // data[3] - 100    y_speed
-                // data[4] - 100    z_speed
-                if(data.length>=2) {
-                    //Log.d("OnReceive","r_pitchData: " + Integer.toString(pitchData) );
-                    //Log.d("OnReceive","r_rollData: "  + Integer.toString(rollData));
+                if (data!=null) {
+                    //Log.d("BT","Hello");
                     dataProc(data);
                 }
             }
@@ -258,10 +310,10 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             public void onClick(View v) {
                 //Show the dialog
                 //rightHand.showSelected();
-                //Log.d("TEST", "BEGIN RIGHT HAND");
-                //Log.d("TEST","RIGHT INSTRUMENT: " + getDefinedString(rightHand.getInstrument()));
+                Log.d("TEST", "BEGIN RIGHT HAND");
+                Log.d("TEST","RIGHT INSTRUMENT: " + getDefinedString(rightHand.getInstrument()));
                 rightHand.showSelected();
-                //Log.d("TEST", "BEGIN LEFT HAND");
+                Log.d("TEST", "BEGIN LEFT HAND");
                 //Log.d("TEST","LEFT INSTRUMENT: " + getDefinedString(leftHand.getInstrument()));
                 leftHand.showSelected();
             }
@@ -270,11 +322,14 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         /**
          * CSD initialization
          */
-        String csd = getResourceFileAsString(R.raw.oscil);
+        String csd = getResourceFileAsString(R.raw.inputtest);
         f = createTempFile(csd);
         csoundObj.addBinding(this);
         csoundObj.startCsound(f);
         //END CSD
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -283,35 +338,66 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         More bluetooth handler
          */
         super.onStart();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
         btActivityStart = false;
         if (!bt.isBluetoothEnabled()) {
             Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(intent, BluetoothState.REQUEST_ENABLE_BT);
-        }
-        else {
-            if(!bt.isServiceAvailable()) {
+        } else {
+            if (!bt.isServiceAvailable()) {
                 bt.setupService();
                 bt.startService(BluetoothState.DEVICE_OTHER);
                 Log.d("MainActivity", "Bluetooth Connect");
             }
         }
         //*********************************************
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://complexability.motionmusicv2/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://complexability.motionmusicv2/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
 
         Log.d("MainActivity", "onStop");
         csoundObj.stop();
         csoundObjCompleted(csoundObj);
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.disconnect();
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.d("MainActivity","onRestart");
+        Log.d("MainActivity", "onRestart");
         String csd = getResourceFileAsString(R.raw.oscil);
         f = createTempFile(csd);
         csoundObj.addBinding(this);
@@ -326,8 +412,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         //cleanup();
         //if(!csoundObj.isPaused()) {
         //if(!btActivityStart) {
-            csoundObj.stop();
-            csoundObjCompleted(csoundObj);
+        //csoundObj.stop();
+        //csoundObjCompleted(csoundObj);
         //}//}
         //csoundObj.stop();
 
@@ -337,8 +423,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     protected void onDestroy() {
         Log.d("MainActivity", "onDestroy");
         //if(!btActivityStart) {
-            super.onDestroy();
-            f.delete();
+        super.onDestroy();
+        f.delete();
         //}
         //csoundObj.stop();
     }
@@ -360,7 +446,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
         outState.putInt(LEFT_ROLL_STATE, leftHand.getEffect(ROLL));
         outState.putInt(LEFT_PITCH_STATE, leftHand.getEffect(PITCH));
-        outState.putInt(LEFT_ACCEL_Y_STATE,leftHand.getEffect(Y_ACCEL));
+        outState.putInt(LEFT_ACCEL_Y_STATE, leftHand.getEffect(Y_ACCEL));
         outState.putInt(LEFT_ACCEL_Z_STATE, leftHand.getEffect(Z_ACCEL));
         outState.putInt(LEFT_ACCEL_X_STATE, leftHand.getEffect(X_ACCEL));
 
@@ -388,11 +474,11 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         btActivityStart = false;
-        if(requestCode == BluetoothState.REQUEST_CONNECT_DEVICE) {
-            if(resultCode == Activity.RESULT_OK)
+        if (requestCode == BluetoothState.REQUEST_CONNECT_DEVICE) {
+            if (resultCode == Activity.RESULT_OK)
                 bt.connect(data);
-        } else if(requestCode == BluetoothState.REQUEST_ENABLE_BT) {
-            if(resultCode == Activity.RESULT_OK) {
+        } else if (requestCode == BluetoothState.REQUEST_ENABLE_BT) {
+            if (resultCode == Activity.RESULT_OK) {
                 bt.setupService();
                 bt.startService(BluetoothState.DEVICE_ANDROID);
             } else {
@@ -422,9 +508,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
-        }
-        else if (id == R.id.action_bluetooth){
-             btActivityStart = true;
+        } else if (id == R.id.action_bluetooth) {
+            btActivityStart = true;
             Log.d("MainActivity", "Bluetooth Select");
             if (bt.getServiceState() == BluetoothState.STATE_CONNECTED) {
                 bt.disconnect();
@@ -438,34 +523,10 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
         return super.onOptionsItemSelected(item);
     }
-    /*
-    Helper function to check if an item is in selectedItem
-     */
-    protected boolean isSelected(String item){
-        int i;
-        for (i = 0 ; i < selectedItem.size() ; i++){
-            if(Objects.equals(selectedItem.get(i), item)){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected void removeItem(String item) {
-        int i;
-        for (i = 0; i < selectedItem.size(); i++) {
-            if (Objects.equals(selectedItem.get(i), item)) {
-                selectedItem.remove(i);
-                return;
-            }
-        }
-    }
 
     @Override
     public void onFragmentInteraction(Uri uri) {
-
     }
-
     /**
      * Csound handler functions
      * Taken from BaseCsoundActivity because we are working with single activity application
@@ -504,16 +565,17 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
         return f;
     }
+
     @Override
     public void setup(CsoundObj csoundObj) {
         Log.d("MainActivity", "Setup");
         //for (int i = 0; i < testArr.length; i++) {
 
-        testArr[0] = csoundObj.getInputChannelPtr(String.format("frequency_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
-        testArr[1] = csoundObj.getInputChannelPtr(String.format("volume_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
-        testArr[2] = csoundObj.getInputChannelPtr(String.format("flanger_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
-        testArr[3] = csoundObj.getInputChannelPtr(String.format("reverb_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
-        testArr[4] = csoundObj.getInputChannelPtr(String.format("vibrato_mod.%d",0), controlChannelType.CSOUND_CONTROL_CHANNEL);
+        testArr[0] = csoundObj.getInputChannelPtr(String.format("frequency_mod.%d", 0), controlChannelType.CSOUND_CONTROL_CHANNEL);
+        testArr[1] = csoundObj.getInputChannelPtr(String.format("volume_mod.%d", 0), controlChannelType.CSOUND_CONTROL_CHANNEL);
+        testArr[2] = csoundObj.getInputChannelPtr(String.format("flanger_mod.%d", 0), controlChannelType.CSOUND_CONTROL_CHANNEL);
+        testArr[3] = csoundObj.getInputChannelPtr(String.format("reverb_mod.%d", 0), controlChannelType.CSOUND_CONTROL_CHANNEL);
+        testArr[4] = csoundObj.getInputChannelPtr(String.format("vibrato_mod.%d", 0), controlChannelType.CSOUND_CONTROL_CHANNEL);
     }
 
     @Override
@@ -534,47 +596,60 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         testArr[3].SetValue(0, reverb);
         testArr[4].SetValue(0, vibrato);
     }
+
     //TODO
     //Fix the processing correctly
-    private void dataProc(byte[] data){
+    private int getBit(byte data,int bitNum){
+        return data & (1<<bitNum);
+    }
+    private void logData(int data, int id){
+        if(_log_step){
+            if(data >= 10 && id >= 2) {
+                Log.d("dataProc", "data raw[" + getDefinedString(2000+id) + "]:" + Integer.toString(data));
+            }
+        }
+        else {
+            Log.d("dataProc", "data raw[" + getDefinedString(2000+id) + "]:" + Integer.toString(data));
+        }
 
-        //data[] is 10 bytes long
-        // data[0] - 90     right hand pitch
-        // data[1] - 90     right hand roll
-        // data[2] - 100    right hand x_speed
-        // data[3] - 100    right hand y_speed
-        // data[4] - 100    right hand z_speed
-
-        // data[5] - 90     left hand pitch
-        // data[6] - 90     left hand roll
-        // data[7] - 100    left hand x_speed
-        // data[8] - 100    left hand y_speed
-        // data[9] - 100    left hand z_speed
+    }
+    private void dataProc(byte[] data) {
+        
+        if (data.length < 6) {
+            return;
+        }
 
         int rightHandEffects[] = rightHand.getAllEffect();
         int LeftHandEffects[] = leftHand.getAllEffect();
-
         float finalData = 0;
         int readData;
         reInitiate();
-        for (int i = 0 ; i < rightHandEffects.length ; i++){
+        //**********************For testing*******************************
+        _pitchTextTest.setText(String.valueOf((data[0] & 0x000000FF)-90));
+        _rollTextTest.setText(String.valueOf((data[1] & 0x000000FF)-90));
+        //***************************************************************
+        for (int i = 0; i < rightHandEffects.length; i++) {
 
-            if (i >= data.length){
-                return;
-            }
-            readData = data[i] & 0x000000FF;
-            Log.d("dataProc", "data raw[" +Integer.toString(i) +":]" + Integer.toString(readData));
-
-            if(i <= 1){
-                finalData = (float) ((readData))/(MAX_GYROSCOPE);
-                //Log.d("dataProc", "In if:" + Float.toString(finalData));
+            if((data[5] & (1<<(7-i))) != 0) {
+                readData = (data[i] & 0x000000FF) * (-1);
             }
             else{
-                finalData = (float) ((readData))/(MAX_ACCELEROMETER);
+                readData = (data[i] & 0x000000FF);
             }
-            Log.d("dataProc", "data float["+ Integer.toString(i) +"]:" + Float.toString(finalData));
 
-            switch(rightHandEffects[i]){
+            //Log.d("dataProc", "data raw[" + Integer.toString(i) + ":]" + Integer.toString(readData));
+            //readData = data[i];
+
+            if (i <= 1) {
+                finalData = (float) ((readData)) / (MAX_GYROSCOPE);
+                //Log.d("dataProc", "In if:" + Float.toString(finalData));
+            } else {
+                finalData = (float) ((readData)) / (MAX_ACCELEROMETER);
+            }
+            if(_bt_logdata) {
+                logData(readData, i);
+            }
+            switch (rightHandEffects[i]) {
                 case NONE:
                     break;
                 case VOLUME:
@@ -584,7 +659,11 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 case FREQUENCY:
                     //Log.d("dataFreq", "data: " + Integer.toHexString(readData));
                     //Log.d("dataProc","freq:" + Float.toString(finalData));
-                    freq  = (finalData);
+                    if(_bt_logdata) {
+                        //Log.d("dataProc", "data raw[" + Integer.toString(i) + "]:" + Integer.toString(readData));
+                        //Log.d("dataProc", "data float[" + Integer.toString(i) + "]:" + Float.toString(finalData));
+                    }
+                    freq = (finalData);
                     break;
                 case REVERB:
                     reverb = (finalData);
@@ -608,11 +687,11 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
             }
         }
         //LeftHand Handler
-        for(int i = 0 ; i < LeftHandEffects.length ; i++){
+        for (int i = 0; i < LeftHandEffects.length; i++) {
             finalData = 0;
             break;
             //if (i+5 <= data.length){
-                //return;
+            //return;
             //}
             //TODO
             /*
@@ -665,11 +744,12 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     }
 
     @Override
-    public void updateValuesFromCsound() {}
+    public void updateValuesFromCsound() {
+    }
 
     @Override
     public void cleanup() {
-        if(!btActivityStart) {
+        if (!btActivityStart) {
             for (int i = 0; i < testArr.length; i++) {
                 testArr[i].Clear();
                 testArr[i] = null;
@@ -690,14 +770,14 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
 
     /**********************************************************************
-                    End of Csound external handler
-     * *******************************************************************/
+     * End of Csound external handler
+     *******************************************************************/
 
 
-    public void dialogFragmentItemSelected(String param, int selectedItem){
-        Log.d("dfItemSelected", param+":" + selectedItem);
+    public void dialogFragmentItemSelected(String param, int selectedItem) {
+        Log.d("dfItemSelected", param + ":" + selectedItem);
         TextView txt;
-        switch(param){
+        switch (param) {
             case "R_pitch":
                 txt = (TextView) findViewById(R.id.r_pitchText);
                 txt.setText(getDefinedString(selectedItem));
@@ -764,18 +844,20 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 break;
         }
     }
-    public void reInitiate(){
+
+    public void reInitiate() {
         reverb = 0;
         volume = (float) 0.5;
-        freq   = (float) 0.5;
+        freq = (float) 0.5;
         vibrato = 0;
         flanger = 0;
     }
-     /*********************************************************************
-                    End of MyDialogFragment
+
+    /*********************************************************************
+     * End of MyDialogFragment
      *********************************************************************/
-    public String getDefinedString(int data){
-        switch (data){
+    public String getDefinedString(int data) {
+        switch (data) {
             case NONE:
                 return "None";
             case VOLUME:
@@ -800,6 +882,16 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 return "Flute";
             case VIBRATO:
                 return "Vibrato";
+            case PITCH_DAT:
+                return "PITCH";
+            case ROLL_DAT:
+                return "ROLL";
+            case X_AXIS:
+                return "X-AXIS";
+            case Y_AXIS:
+                return "Y-AXIS";
+            case Z_AXIS:
+                return "Z-AXIS";
             default:
                 return null;
         }

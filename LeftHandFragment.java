@@ -57,7 +57,6 @@ public class LeftHandFragment extends Fragment{
     TextView l_upDown_txt;
     TextView l_pitch_txt;
     TextView l_roll_txt;
-
     public LeftHandFragment() {
         // Required empty public constructor
     }
@@ -343,8 +342,20 @@ public class LeftHandFragment extends Fragment{
                 return "Flute";
             case VIBRATO:
                 return "Vibrato";
+
             default:
                 return null;
+        }
+    }
+    public void testSetText(int val, int id){
+        switch (id){
+            case 0:
+
+                break;
+            case 1:
+                break;
+            default:
+                break;
         }
     }
 }

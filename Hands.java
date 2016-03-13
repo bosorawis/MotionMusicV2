@@ -23,6 +23,8 @@ public class Hands {
     private static final int FLANGER    = 5;
     private static final int DISTORTION = 6;
     private static final int ROTARY     = 7;
+    private static final int VIBRATO    = 8;
+
     private static final int SPACY      = 1000;
     private static final int GUITAR     = 1001;
     private static final int FLUTE      = 1002;
@@ -78,12 +80,15 @@ public class Hands {
                 return "Distortion";
             case ROTARY:
                 return "Rotary";
+            case VIBRATO:
+                return "Vibrato";
             case SPACY:
                 return "Spacy";
             case GUITAR:
                 return "Guitar";
             case FLUTE:
                 return "Flute";
+
             default:
                 return null;
         }
