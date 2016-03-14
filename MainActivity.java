@@ -62,23 +62,17 @@ import csnd6.controlChannelType;
  * **Csound
  */
 public class MainActivity extends AppCompatActivity implements LeftHandFragment.OnFragmentInteractionListener, RightHandFragment.OnFragmentInteractionListener, CsoundObjListener, CsoundBinding {
-    public static Hands rightHand = new Hands();
-    public static Hands leftHand = new Hands();
-
     private static final String INSTRUMENT_STATE = "instrument";
     private static final String RIGHT_ACCEL_X_STATE = "right_x";
     private static final String RIGHT_ACCEL_Y_STATE = "right_y";
     private static final String RIGHT_ACCEL_Z_STATE = "right_z";
     private static final String RIGHT_ROLL_STATE = "right_roll";
     private static final String RIGHT_PITCH_STATE = "right_pitch";
-
     private static final String LEFT_ACCEL_X_STATE = "left_x";
     private static final String LEFT_ACCEL_Y_STATE = "left_y";
     private static final String LEFT_ACCEL_Z_STATE = "left_z";
     private static final String LEFT_ROLL_STATE = "left_roll";
     private static final String LEFT_PITCH_STATE = "left_pitch";
-
-
     /**
      * Variable for Csound
      */
@@ -92,46 +86,35 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     private static final int DISTORTION = 6;
     private static final int ROTARY = 7;
     private static final int VIBRATO = 8;
-
-
     private static final int SPACY = 1000;
     private static final int GUITAR = 1001;
     private static final int FLUTE = 1002;
-
-    private static final int PITCH_DAT  = 2000;
-    private static final int ROLL_DAT   = 2001;
-    private static final int X_AXIS     = 2002;
-    private static final int Y_AXIS     = 2003;
-    private static final int Z_AXIS     = 2004;
-
-
+    private static final int PITCH_DAT = 2000;
+    private static final int ROLL_DAT = 2001;
+    private static final int X_AXIS = 2002;
+    private static final int Y_AXIS = 2003;
+    private static final int Z_AXIS = 2004;
     private static final int MAX_ACCELEROMETER = 190;
-    private static final int MAX_GYROSCOPE = 190;
-    private static final int DATA_LENGTH = 5;
-
+    private static final int MAX_GYROSCOPE = 180;
+    private static final int DATA_LENGTH = 6;
     private static final int STEP_THRESHOLD = 5;
-
-
     private static final int PITCH = 0;
     private static final int ROLL = 1;
     private static final int X_ACCEL = 2;
     private static final int Y_ACCEL = 3;
     private static final int Z_ACCEL = 4;
-
-    private float volume = (float) 0.5;
-    private float freq = (float) 0.5;
-    private float flanger = (float) 0.0;
-    private float reverb = (float) 0.72;
-    private float vibrato = (float) 0.5;
+    public static Hands rightHand = new Hands();
+    public static Hands leftHand = new Hands();
+    static List<String> selectedItem = new ArrayList<String>();
+    //Bluetooth Initialization
+    protected BluetoothSPP bt;
     TextView _pitchTextTest;
-    TextView _rollTextTest ;
+    TextView _rollTextTest;
     int rightHandCurrent[] = rightHand.getAllEffect();
     int leftHandCurrent[] = leftHand.getAllEffect();
     File f;
     boolean _bt_logdata = false;
     boolean _log_step = false;
-
-    static List<String> selectedItem = new ArrayList<String>();
     /************************
      * Csound initialization
      ************************/
@@ -139,13 +122,15 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     //Structure:
     //l_inst, l_fw, l_ud, l_lr, l_tl, l_tn, r_inst, r_fw, r_ud, r_lr, r_
     CsoundMYFLTArray testArr[] = new CsoundMYFLTArray[5];
-
     //protected Handler handler = new Handler();
     ToggleButton startStop;
     float csdTest = 0;
     boolean btActivityStart = false;
-    //Bluetooth Initialization
-    protected BluetoothSPP bt;
+    private float volume = (float) 0.5;
+    private float freq = (float) 0.5;
+    private float flanger = (float) 0.0;
+    private float reverb = (float) 0.72;
+    private float vibrato = (float) 0.5;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -198,8 +183,8 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         //Default value hard coded for testing
 
 
-        _pitchTextTest = (TextView)findViewById(R.id.PitchValtextView);
-        _rollTextTest  = (TextView)findViewById(R.id.RollValTextView) ;
+        _pitchTextTest = (TextView) findViewById(R.id.PitchValtextView);
+        _rollTextTest = (TextView) findViewById(R.id.RollValTextView);
 
         final Button testButton = (Button) findViewById(R.id.testButton);
         final Switch testSwitch = (Switch) findViewById(R.id.logSwitch);
@@ -212,21 +197,19 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         testSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
+                if (isChecked) {
                     _bt_logdata = true;
-                }
-                else{
-                    _bt_logdata =  false;
+                } else {
+                    _bt_logdata = false;
                 }
             }
         });
         stepSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
+                if (isChecked) {
                     _log_step = true;
-                }
-                else{
+                } else {
                     _log_step = false;
                 }
             }
@@ -298,9 +281,21 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
          */
         bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
             public void onDataReceived(byte[] data, String message) {
-                if (data!=null) {
-                    //Log.d("BT","Hello");
-                    dataProc(data);
+                //Log.d("MainActiviity","size:" + Integer.toString(data.length));
+                if (data.length == 6) {
+                    int readData[] = new int[5];
+                    for (int i = 0; i < 6 - 1; i++) {
+                        if (i >= 2) {
+                            if (isBitChecked(data[5], i)) {
+                                readData[i] = (data[i] & 0x000000FF) * getSignbit(data[5], i + 3);
+                            }
+                        } else {
+                            readData[i] = (data[i] & 0xFF) * getSignbit(data[5], i);
+                            Log.d("Data", "Data["+Integer.toString(i)+"]: " +Integer.toString(data[i])+"\t\t" + Integer.toHexString(data[i]));
+
+                        }
+                    }
+                    dataProc(readData);
                 }
             }
         });
@@ -311,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
                 //Show the dialog
                 //rightHand.showSelected();
                 Log.d("TEST", "BEGIN RIGHT HAND");
-                Log.d("TEST","RIGHT INSTRUMENT: " + getDefinedString(rightHand.getInstrument()));
+                Log.d("TEST", "RIGHT INSTRUMENT: " + getDefinedString(rightHand.getInstrument()));
                 rightHand.showSelected();
                 Log.d("TEST", "BEGIN LEFT HAND");
                 //Log.d("TEST","LEFT INSTRUMENT: " + getDefinedString(leftHand.getInstrument()));
@@ -472,23 +467,6 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
 
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        btActivityStart = false;
-        if (requestCode == BluetoothState.REQUEST_CONNECT_DEVICE) {
-            if (resultCode == Activity.RESULT_OK)
-                bt.connect(data);
-        } else if (requestCode == BluetoothState.REQUEST_ENABLE_BT) {
-            if (resultCode == Activity.RESULT_OK) {
-                bt.setupService();
-                bt.startService(BluetoothState.DEVICE_ANDROID);
-            } else {
-                Toast.makeText(getApplicationContext()
-                        , "Bluetooth was not enabled."
-                        , Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        }
-    }
 
 
     @Override
@@ -527,44 +505,7 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
     @Override
     public void onFragmentInteraction(Uri uri) {
     }
-    /**
-     * Csound handler functions
-     * Taken from BaseCsoundActivity because we are working with single activity application
-     */
 
-    protected String getResourceFileAsString(int resId) {
-        StringBuilder str = new StringBuilder();
-
-        InputStream is = getResources().openRawResource(resId);
-        BufferedReader r = new BufferedReader(new InputStreamReader(is));
-        String line;
-
-        try {
-            while ((line = r.readLine()) != null) {
-                str.append(line).append("\n");
-            }
-        } catch (IOException ios) {
-
-        }
-
-        return str.toString();
-    }
-
-    protected File createTempFile(String csd) {
-        File f = null;
-
-        try {
-            f = File.createTempFile("temp", ".csd", this.getCacheDir());
-            FileOutputStream fos = new FileOutputStream(f);
-            fos.write(csd.getBytes());
-            fos.close();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        return f;
-    }
 
     @Override
     public void setup(CsoundObj csoundObj) {
@@ -597,151 +538,6 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         testArr[4].SetValue(0, vibrato);
     }
 
-    //TODO
-    //Fix the processing correctly
-    private int getBit(byte data,int bitNum){
-        return data & (1<<bitNum);
-    }
-    private void logData(int data, int id){
-        if(_log_step){
-            if(data >= 10 && id >= 2) {
-                Log.d("dataProc", "data raw[" + getDefinedString(2000+id) + "]:" + Integer.toString(data));
-            }
-        }
-        else {
-            Log.d("dataProc", "data raw[" + getDefinedString(2000+id) + "]:" + Integer.toString(data));
-        }
-
-    }
-    private void dataProc(byte[] data) {
-        
-        if (data.length < 6) {
-            return;
-        }
-
-        int rightHandEffects[] = rightHand.getAllEffect();
-        int LeftHandEffects[] = leftHand.getAllEffect();
-        float finalData = 0;
-        int readData;
-        reInitiate();
-        //**********************For testing*******************************
-        _pitchTextTest.setText(String.valueOf((data[0] & 0x000000FF)-90));
-        _rollTextTest.setText(String.valueOf((data[1] & 0x000000FF)-90));
-        //***************************************************************
-        for (int i = 0; i < rightHandEffects.length; i++) {
-
-            if((data[5] & (1<<(7-i))) != 0) {
-                readData = (data[i] & 0x000000FF) * (-1);
-            }
-            else{
-                readData = (data[i] & 0x000000FF);
-            }
-
-            //Log.d("dataProc", "data raw[" + Integer.toString(i) + ":]" + Integer.toString(readData));
-            //readData = data[i];
-
-            if (i <= 1) {
-                finalData = (float) ((readData)) / (MAX_GYROSCOPE);
-                //Log.d("dataProc", "In if:" + Float.toString(finalData));
-            } else {
-                finalData = (float) ((readData)) / (MAX_ACCELEROMETER);
-            }
-            if(_bt_logdata) {
-                logData(readData, i);
-            }
-            switch (rightHandEffects[i]) {
-                case NONE:
-                    break;
-                case VOLUME:
-                    //Log.d("dataProc","volume:" + Float.toString(finalData));
-                    volume = (finalData);
-                    break;
-                case FREQUENCY:
-                    //Log.d("dataFreq", "data: " + Integer.toHexString(readData));
-                    //Log.d("dataProc","freq:" + Float.toString(finalData));
-                    if(_bt_logdata) {
-                        //Log.d("dataProc", "data raw[" + Integer.toString(i) + "]:" + Integer.toString(readData));
-                        //Log.d("dataProc", "data float[" + Integer.toString(i) + "]:" + Float.toString(finalData));
-                    }
-                    freq = (finalData);
-                    break;
-                case REVERB:
-                    reverb = (finalData);
-                    break;
-                case DELAY:
-                    break;
-                case FLANGER:
-                    flanger = (finalData);
-                    break;
-                case DISTORTION:
-                    break;
-                case ROTARY:
-                    break;
-                case VIBRATO:
-                    //Log.d("dataProc","vibrato:" + Float.toString(finalData));
-                    vibrato = (finalData);
-                    break;
-                default:
-                    Log.d("MainActivity", "WTF!!!");
-                    break;
-            }
-        }
-        //LeftHand Handler
-        for (int i = 0; i < LeftHandEffects.length; i++) {
-            finalData = 0;
-            break;
-            //if (i+5 <= data.length){
-            //return;
-            //}
-            //TODO
-            /*
-            readData = data[i+5];
-            //Log.d("DataReceived","Num: "+ Integer.toString(i) + " \tdata: " + Integer.toString(readData));
-            if(i <= 1){
-                finalData = (float)(readData)/(MAX_GYROSCOPE);
-                //Log.d("dataProc", "In if:" + Float.toString(finalData));
-            }
-            else{
-                finalData = (float)(readData)/(MAX_ACCELEROMETER);
-            }
-            switch(LeftHandEffects[i]){
-                case NONE:
-                    break;
-                case VOLUME:
-                    //Log.d("dataProc","volume:" + Float.toString(finalData));
-                    volume += finalData;
-                    break;
-                case FREQUENCY:
-                    //Log.d("dataFreq", "data: " + Integer.toHexString(readData));
-                    //Log.d("dataProc","freq:" + Float.toString(finalData));
-                    freq  += finalData;
-                    break;
-                case REVERB:
-                    reverb += finalData;
-                    break;
-                case DELAY:
-                    break;
-                case FLANGER:
-                    flanger += finalData;
-                    break;
-                case DISTORTION:
-                    break;
-                case ROTARY:
-                    break;
-                case VIBRATO:
-                    Log.d("dataProc","vibrato:" + Float.toString(finalData));
-                    vibrato += finalData;
-                    break;
-
-                default:
-                    Log.d("MainActivity", "WTF!!!");
-                    break;
-            }
-            */
-        }
-
-
-    }
 
     @Override
     public void updateValuesFromCsound() {
@@ -851,6 +647,205 @@ public class MainActivity extends AppCompatActivity implements LeftHandFragment.
         freq = (float) 0.5;
         vibrato = 0;
         flanger = 0;
+    }
+    private int getSignbit(byte data, int bitNum) {
+        if (isBitChecked(data, bitNum)) {
+            return -1;
+        } else {
+            return 1;
+        }
+    }
+
+    public boolean isBitChecked(byte data, int bitNum) {
+        int dat = data & (1 << bitNum);
+        if (dat != 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void logData(int data, int id) {
+        if (_log_step) {
+            if (data >= 10 && id >= 2) {
+                Log.d("dataProc", "data raw[" + getDefinedString(2000 + id) + "]:" + Integer.toString(data));
+            }
+        } else {
+            Log.d("dataProc", "data raw[" + getDefinedString(2000 + id) + "]:" + Integer.toString(data));
+        }
+
+    }
+
+    private void dataProc(int[] data) {
+
+
+        int rightHandEffects[] = rightHand.getAllEffect();
+        int LeftHandEffects[] = leftHand.getAllEffect();
+        float finalData = 0;
+        //int readData;
+        reInitiate();
+        //**********************For testing*******************************
+        _pitchTextTest.setText(String.valueOf(data[0]));
+        _rollTextTest.setText(String.valueOf(data[1]));
+        //***************************************************************
+        for (int i = 0; i < rightHandEffects.length; i++) {
+
+            //if((data[5] & (1<<(7-i))) != 0) {
+            //    readData = (data[i] & 0x000000FF) * (-1);
+            //}
+            //else{
+            //    readData = (data[i] & 0x000000FF);
+            //}
+
+            //Log.d("dataProc", "data raw[" + Integer.toString(i) + ":]" + Integer.toString(readData));
+            //readData = data[i];
+
+            if (i <= 1) {
+                finalData = (float) (MAX_GYROSCOPE+((data[i]))) / (2*MAX_GYROSCOPE);
+                //Log.d("dataProc", "In if:" + Float.toString(finalData));
+            } else {
+                finalData = (float) ((data[i])) / (MAX_ACCELEROMETER);
+            }
+            if (_bt_logdata) {
+                logData(data[i], i);
+            }
+            switch (rightHandEffects[i]) {
+                case NONE:
+                    break;
+                case VOLUME:
+                    volume = (finalData);
+                    break;
+                case FREQUENCY:
+                    freq = (finalData);
+                    break;
+                case REVERB:
+                    reverb = (finalData);
+                    break;
+                case DELAY:
+                    break;
+                case FLANGER:
+                    flanger = (finalData);
+                    break;
+                case DISTORTION:
+                    break;
+                case ROTARY:
+                    break;
+                case VIBRATO:
+                    vibrato = (finalData);
+                    break;
+                default:
+                    Log.d("MainActivity", "WTF!!!");
+                    break;
+            }
+        }
+        //LeftHand Handler
+        //for (int i = 0; i < LeftHandEffects.length; i++) {
+        //    finalData = 0;
+        //    break;
+        //    /*
+        //    if (i+5 <= data.length){
+        //    return;
+        //    }
+        //
+        //    readData = data[i+5];
+        //    //Log.d("DataReceived","Num: "+ Integer.toString(i) + " \tdata: " + Integer.toString(readData));
+        //    if(i <= 1){
+        //        finalData = (float)(readData)/(MAX_GYROSCOPE);
+        //        //Log.d("dataProc", "In if:" + Float.toString(finalData));
+        //    }
+        //    else{
+        //        finalData = (float)(readData)/(MAX_ACCELEROMETER);
+        //    }
+        //    switch(LeftHandEffects[i]){
+        //        case NONE:
+        //            break;
+        //        case VOLUME:
+        //            //Log.d("dataProc","volume:" + Float.toString(finalData));
+        //            volume += finalData;
+        //            break;
+        //        case FREQUENCY:
+        //            //Log.d("dataFreq", "data: " + Integer.toHexString(readData));
+        //            //Log.d("dataProc","freq:" + Float.toString(finalData));
+        //            freq  += finalData;
+        //            break;
+        //        case REVERB:
+        //            reverb += finalData;
+        //            break;
+        //        case DELAY:
+        //            break;
+        //        case FLANGER:
+        //            flanger += finalData;
+        //            break;
+        //        case DISTORTION:
+        //            break;
+        //        case ROTARY:
+        //            break;
+        //        case VIBRATO:
+        //            Log.d("dataProc","vibrato:" + Float.toString(finalData));
+        //            vibrato += finalData;
+        //            break;
+//
+        //        default:
+        //            Log.d("MainActivity", "WTF!!!");
+        //            break;
+        //    }
+        //    */
+//
+        //}
+
+
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        btActivityStart = false;
+        if (requestCode == BluetoothState.REQUEST_CONNECT_DEVICE) {
+            if (resultCode == Activity.RESULT_OK)
+                bt.connect(data);
+        } else if (requestCode == BluetoothState.REQUEST_ENABLE_BT) {
+            if (resultCode == Activity.RESULT_OK) {
+                bt.setupService();
+                bt.startService(BluetoothState.DEVICE_ANDROID);
+            } else {
+                Toast.makeText(getApplicationContext()
+                        , "Bluetooth was not enabled."
+                        , Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
+    }
+
+    protected String getResourceFileAsString(int resId) {
+        StringBuilder str = new StringBuilder();
+
+        InputStream is = getResources().openRawResource(resId);
+        BufferedReader r = new BufferedReader(new InputStreamReader(is));
+        String line;
+
+        try {
+            while ((line = r.readLine()) != null) {
+                str.append(line).append("\n");
+            }
+        } catch (IOException ios) {
+
+        }
+
+        return str.toString();
+    }
+
+    protected File createTempFile(String csd) {
+        File f = null;
+
+        try {
+            f = File.createTempFile("temp", ".csd", this.getCacheDir());
+            FileOutputStream fos = new FileOutputStream(f);
+            fos.write(csd.getBytes());
+            fos.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return f;
     }
 
     /*********************************************************************
